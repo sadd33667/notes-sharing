@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -35,6 +37,26 @@ public class User {
     private String secondaryEmail;
 
     private LocalDateTime createdAt;
+
+    // Relations - my vision
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserSettings settings;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Note> notes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "fUser")
+    @Builder.Default
+    private List<Friendship> friendshipsSent = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sUser")
+    @Builder.Default
+    private List<Friendship> friendshipsReceived = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    @Builder.Default
+    private List<NoteSharing> myShares = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

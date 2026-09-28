@@ -3,6 +3,8 @@ package com.notes.sharing.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "notes")
@@ -28,6 +30,11 @@ public class Note {
     private LocalDateTime endDate;
     private Integer notifyThreshold;
     private String visibility; // private, public, shared
+
+    // Relations
+    @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<NoteSharing> sharedWith = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
