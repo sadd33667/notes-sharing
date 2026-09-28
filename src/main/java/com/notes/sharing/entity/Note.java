@@ -19,6 +19,8 @@ public class Note {
     private User owner;
 
     private String title;
+    @Column(length = 5000)
+    private String contents;
     private String noteType; // text, checklist, image
     private String color;
 
@@ -26,6 +28,7 @@ public class Note {
     private Boolean isPinned = false;
 
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private Integer notifyThreshold;
@@ -39,5 +42,11 @@ public class Note {
     @PrePersist
     public void prePersist() {
         if (createdAt == null) createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }
