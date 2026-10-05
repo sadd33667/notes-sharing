@@ -22,16 +22,16 @@ def check(name, cond, extra=""):
     print(("PASS " if cond else "FAIL ") + name, extra)
 
 t = str(__import__("time").time()).replace(".", "")
-r, owner = call("POST", "/api/auth/register", body={"username": "u1", "email": f"u1{t}@t.com", "password": "pw12345"})
+r, owner = call("POST", "/api/auth/register", body={"username": "u1" + t, "email": f"u1{t}@t.com", "password": "pw12345"})
 check("register", r == 201, str(r))
 tok1 = owner["token"] if isinstance(owner, dict) else None
 
-r, u2 = call("POST", "/api/auth/register", body={"username": "u2", "email": f"u2{t}@t.com", "password": "pw12345"})
+r, u2 = call("POST", "/api/auth/register", body={"username": "u2" + t, "email": f"u2{t}@t.com", "password": "pw12345"})
 check("register-2", r == 201, str(r))
 tok2 = u2["token"]
 
 r, me = call("GET", "/api/users/me", token=tok1)
-check("profile", r == 200 and me["username"] == "u1", str(r))
+check("profile", r == 200 and me["username"].startswith("u1"), str(r))
 
 r, note = call("POST", "/api/notes", token=tok1, body={"ownerId": owner["userId"], "title": "N1", "contents": "hi"})
 check("create-note", r == 201 and note["noteID"], str(r))
@@ -55,7 +55,7 @@ check("get-note-shared", r == 200, str(r))
 r, lst = call("GET", "/api/notes/shared-with-me", token=tok2)
 check("shared-with-me", r == 200 and len(lst) == 1, str(r))
 
-r, _ = call("POST", "/api/friends/request", token=tok1, body={"username": "u2"})
+r, _ = call("POST", "/api/friends/request", token=tok1, body={"username": u2["username"]})
 check("friend-request", r == 201, str(r))
 
 r, pend = call("GET", "/api/friends/pending", token=tok2)
