@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/notes")
@@ -45,5 +46,22 @@ public class NoteController {
         Long requesterId = (Long) auth.getPrincipal();
         noteService.deleteNote(id, requesterId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<NoteResponse>> myNotes(
+            org.springframework.security.core.Authentication auth) {
+        return ResponseEntity.ok(noteService.myNotes((Long) auth.getPrincipal()));
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<NoteResponse>> upcoming(
+            @RequestParam String from,
+            @RequestParam String to,
+            org.springframework.security.core.Authentication auth) {
+        return ResponseEntity.ok(noteService.upcoming(
+                (Long) auth.getPrincipal(),
+                java.time.LocalDateTime.parse(from),
+                java.time.LocalDateTime.parse(to)));
     }
 }

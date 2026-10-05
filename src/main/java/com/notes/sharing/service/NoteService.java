@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NoteService {
@@ -79,6 +82,18 @@ public class NoteService {
             throw new NotFoundException("Note not found: " + noteId);
         }
         noteRepository.delete(note);
+    }
+
+    public List<NoteResponse> myNotes(Long ownerId) {
+        return noteRepository.findByOwner_UserID(ownerId).stream()
+                .map(NoteService::toResponse)
+                .toList();
+    }
+
+    public List<NoteResponse> upcoming(Long ownerId, LocalDateTime from, LocalDateTime to) {
+        return noteRepository.findUpcoming(ownerId, from, to).stream()
+                .map(NoteService::toResponse)
+                .toList();
     }
 
     public static NoteResponse toResponse(Note n) {
