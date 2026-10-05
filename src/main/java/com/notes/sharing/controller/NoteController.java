@@ -20,4 +20,12 @@ public class NoteController {
     public ResponseEntity<NoteResponse> create(@Valid @RequestBody CreateNoteRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(noteService.createNote(req));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<NoteResponse> getOne(
+            @PathVariable Long id,
+            org.springframework.security.core.Authentication auth) {
+        Long requesterId = (Long) auth.getPrincipal();
+        return ResponseEntity.ok(noteService.getNote(id, requesterId));
+    }
 }

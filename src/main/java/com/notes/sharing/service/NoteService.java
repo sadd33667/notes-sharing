@@ -6,6 +6,7 @@ import com.notes.sharing.entity.Note;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.NoteRepository;
+import com.notes.sharing.repository.NoteSharingRepository;
 import com.notes.sharing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
+    private final NoteSharingRepository sharingRepository;
 
     @Transactional
     public NoteResponse createNote(CreateNoteRequest req) {
@@ -34,6 +36,21 @@ public class NoteService {
 
         Note saved = noteRepository.save(note);
         return toResponse(saved);
+    }
+
+    public NoteResponse getNote(Long noteId, Long requesterId) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+
+        boolean isOwner = note.getOwner().getUserID().equals(requesterId);
+        boolean isShared = sharingRepository.findByNote_NoteID(noteId).stream()
+                .anyMatch(s -> s.getUser().getUserID().equals(requesterId));
+        boolean isPublic = "public".equalsIgnoreCase(note.getVisibility());
+
+        if (!isOwner && !isShared && !isPublic) {
+            throw new NotFoundException("Note not found: " + noteId);
+        }
+        return toResponse(note);
     }
 
     public static NoteResponse toResponse(Note n) {
