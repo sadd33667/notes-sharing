@@ -22,9 +22,10 @@ class CreateNoteTest {
 
     @Test
     void createNote_returnsSavedNote() {
+        String tag = String.valueOf(System.nanoTime());
         User user = userRepository.save(User.builder()
-                .username("sara")
-                .email("sara" + System.nanoTime() + "@test.com")
+                .username("sara" + tag)
+                .email("sara" + tag + "@test.com")
                 .passwordHash("hash")
                 .build());
 

@@ -25,6 +25,9 @@ public class AuthService {
         if (userRepository.findByEmail(req.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already registered");
         }
+        if (userRepository.findByUsername(req.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already taken");
+        }
 
         User user = User.builder()
                 .username(req.getUsername())
