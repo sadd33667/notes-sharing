@@ -2,6 +2,7 @@ package com.notes.sharing.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class Note {
     // Relations
     @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
     @Builder.Default
+    @JsonIgnore
     private List<NoteSharing> sharedWith = new ArrayList<>();
 
     @PrePersist

@@ -2,6 +2,7 @@ package com.notes.sharing.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,22 +41,27 @@ public class User {
 
     // Relations - my vision
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private UserSettings settings;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     @Builder.Default
+    @JsonIgnore
     private List<Note> notes = new ArrayList<>();
 
     @OneToMany(mappedBy = "fUser")
     @Builder.Default
+    @JsonIgnore
     private List<Friendship> friendshipsSent = new ArrayList<>();
 
     @OneToMany(mappedBy = "sUser")
     @Builder.Default
+    @JsonIgnore
     private List<Friendship> friendshipsReceived = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     @Builder.Default
+    @JsonIgnore
     private List<NoteSharing> myShares = new ArrayList<>();
 
     @PrePersist
