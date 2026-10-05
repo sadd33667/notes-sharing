@@ -57,6 +57,11 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
+    @Transactional
+    public void deleteAccount(Long userId) {
+        userRepository.delete(getUser(userId));
+    }
+
     private static ProfileResponse toProfile(User u) {
         return ProfileResponse.builder()
                 .userID(u.getUserID()).username(u.getUsername()).userTag(u.getUserTag())

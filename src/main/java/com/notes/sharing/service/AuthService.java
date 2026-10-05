@@ -48,4 +48,16 @@ public class AuthService {
         String token = jwtService.generateToken(user.getUserID(), user.getEmail());
         return new AuthResponse(token, user.getUserID(), user.getUsername());
     }
+
+    @Transactional
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Old password is wrong");
+        }
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
 }

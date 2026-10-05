@@ -38,4 +38,10 @@ public class UserController {
             @RequestBody Map<String, Object> body, Authentication auth) {
         return ResponseEntity.ok(userService.updateSettings((Long) auth.getPrincipal(), body));
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAccount(Authentication auth) {
+        userService.deleteAccount((Long) auth.getPrincipal());
+        return ResponseEntity.noContent().build();
+    }
 }
