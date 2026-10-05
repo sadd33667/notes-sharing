@@ -38,8 +38,7 @@ public class NoteService {
         return toResponse(saved);
     }
 
-    public NoteResponse getNote(Long noteId, Long requesterId) {
-        Note note = noteRepository.findById(noteId)
+    public NoteResponse getNote(Long noteId, Long requesterId) {        Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
 
         boolean isOwner = note.getOwner().getUserID().equals(requesterId);
@@ -51,6 +50,35 @@ public class NoteService {
             throw new NotFoundException("Note not found: " + noteId);
         }
         return toResponse(note);
+    }
+
+    @Transactional
+    public NoteResponse updateNote(Long noteId, Long requesterId, String title, String contents) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+
+        boolean isOwner = note.getOwner().getUserID().equals(requesterId);
+        boolean canEdit = sharingRepository.findByNote_NoteID(noteId).stream()
+                .anyMatch(s -> s.getUser().getUserID().equals(requesterId)
+                        && "edit".equalsIgnoreCase(s.getPermission()));
+
+        if (!isOwner && !canEdit) {
+            throw new NotFoundException("Note not found: " + noteId);
+        }
+        if (title != null) note.setTitle(title);
+        if (contents != null) note.setContents(contents);
+        return toResponse(noteRepository.save(note));
+    }
+
+    @Transactional
+    public void deleteNote(Long noteId, Long requesterId) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+
+        if (!note.getOwner().getUserID().equals(requesterId)) {
+            throw new NotFoundException("Note not found: " + noteId);
+        }
+        noteRepository.delete(note);
     }
 
     public static NoteResponse toResponse(Note n) {

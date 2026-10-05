@@ -28,4 +28,22 @@ public class NoteController {
         Long requesterId = (Long) auth.getPrincipal();
         return ResponseEntity.ok(noteService.getNote(id, requesterId));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<NoteResponse> update(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> body,
+            org.springframework.security.core.Authentication auth) {
+        Long requesterId = (Long) auth.getPrincipal();
+        return ResponseEntity.ok(noteService.updateNote(id, requesterId, body.get("title"), body.get("contents")));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            org.springframework.security.core.Authentication auth) {
+        Long requesterId = (Long) auth.getPrincipal();
+        noteService.deleteNote(id, requesterId);
+        return ResponseEntity.noContent().build();
+    }
 }
