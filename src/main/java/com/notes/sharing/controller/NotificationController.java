@@ -1,6 +1,6 @@
 package com.notes.sharing.controller;
 
-import com.notes.sharing.entity.Notification;
+import com.notes.sharing.dto.NotificationResponse;
 import com.notes.sharing.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<List<Notification>> mine(Authentication auth) {
+    public ResponseEntity<List<NotificationResponse>> mine(Authentication auth) {
         return ResponseEntity.ok(notificationService.myNotifications((Long) auth.getPrincipal()));
     }
 

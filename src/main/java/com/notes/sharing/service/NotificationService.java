@@ -1,5 +1,6 @@
 package com.notes.sharing.service;
 
+import com.notes.sharing.dto.NotificationResponse;
 import com.notes.sharing.entity.Notification;
 import com.notes.sharing.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +15,18 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    public List<Notification> myNotifications(Long userId) {
-        return notificationRepository.findByNotified_UserIDOrderByIssueDateDesc(userId);
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> myNotifications(Long userId) {
+        return notificationRepository.findByNotified_UserIDOrderByIssueDateDesc(userId).stream()
+                .map(n -> NotificationResponse.builder()
+                        .notificationID(n.getNotificationID())
+                        .type(n.getType())
+                        .isRead(n.getIsRead())
+                        .issueDate(n.getIssueDate())
+                        .noteId(n.getNote() != null ? n.getNote().getNoteID() : null)
+                        .notifierUsername(n.getNotifier() != null ? n.getNotifier().getUsername() : null)
+                        .build())
+                .toList();
     }
 
     @Transactional

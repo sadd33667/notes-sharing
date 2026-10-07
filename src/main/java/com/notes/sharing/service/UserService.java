@@ -8,6 +8,7 @@ import com.notes.sharing.entity.User;
 import com.notes.sharing.entity.UserSettings;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.FriendshipRepository;
+import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
 import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
@@ -22,6 +23,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserSettingsRepository settingsRepository;
+    private final NoteRepository noteRepository;
     private final NoteSharingRepository sharingRepository;
     private final FriendshipRepository friendshipRepository;
     private final NotificationRepository notificationRepository;
@@ -66,6 +68,8 @@ public class UserService {
     @Transactional
     public void deleteAccount(Long userId) {
         notificationRepository.deleteByUser(userId);
+        noteRepository.findByOwner_UserID(userId)
+                .forEach(n -> notificationRepository.deleteByNote(n.getNoteID()));
         sharingRepository.deleteByUser(userId);
         friendshipRepository.deleteByUser(userId);
         userRepository.delete(getUser(userId));
