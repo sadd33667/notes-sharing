@@ -64,4 +64,13 @@ public class NoteController {
                 java.time.LocalDateTime.parse(from),
                 java.time.LocalDateTime.parse(to)));
     }
+
+    @PutMapping("/{id}/pin")
+    public ResponseEntity<NoteResponse> setPinned(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, Boolean> body,
+            org.springframework.security.core.Authentication auth) {
+        Boolean pinned = body.getOrDefault("isPinned", true);
+        return ResponseEntity.ok(noteService.setPinned(id, (Long) auth.getPrincipal(), pinned));
+    }
 }

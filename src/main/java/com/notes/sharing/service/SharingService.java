@@ -61,4 +61,14 @@ public class SharingService {
                 .map(s -> NoteService.toResponse(s.getNote()))
                 .toList();
     }
+
+    @Transactional
+    public void setFavorite(Long noteId, Long userId, boolean favorite) {
+        NoteSharing sharing = sharingRepository.findByNote_NoteID(noteId).stream()
+                .filter(s -> s.getUser().getUserID().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+        sharing.setIsFavorite(favorite);
+        sharingRepository.save(sharing);
+    }
 }

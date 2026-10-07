@@ -39,4 +39,14 @@ public class SharingController {
     public ResponseEntity<List<NoteResponse>> sharedWithMe(Authentication auth) {
         return ResponseEntity.ok(sharingService.sharedWithMe((Long) auth.getPrincipal()));
     }
+
+    @PutMapping("/api/notes/{id}/favorite")
+    public ResponseEntity<Void> setFavorite(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, Boolean> body,
+            Authentication auth) {
+        sharingService.setFavorite(id, (Long) auth.getPrincipal(),
+                body.getOrDefault("isFavorite", true));
+        return ResponseEntity.ok().build();
+    }
 }

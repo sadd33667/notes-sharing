@@ -96,6 +96,18 @@ public class NoteService {
                 .toList();
     }
 
+    @Transactional
+    public NoteResponse setPinned(Long noteId, Long requesterId, boolean pinned) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+
+        if (!note.getOwner().getUserID().equals(requesterId)) {
+            throw new NotFoundException("Note not found: " + noteId);
+        }
+        note.setIsPinned(pinned);
+        return toResponse(noteRepository.save(note));
+    }
+
     public static NoteResponse toResponse(Note n) {
         return NoteResponse.builder()
                 .noteID(n.getNoteID())
