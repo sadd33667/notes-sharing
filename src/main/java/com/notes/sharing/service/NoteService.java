@@ -85,7 +85,13 @@ public class NoteService {
     }
 
     public List<NoteResponse> myNotes(Long ownerId) {
-        return noteRepository.findByOwner_UserID(ownerId).stream()
+        return noteRepository.findMineFiltered(ownerId, null).stream()
+                .map(NoteService::toResponse)
+                .toList();
+    }
+
+    public List<NoteResponse> myNotesByType(Long ownerId, String type) {
+        return noteRepository.findMineFiltered(ownerId, type).stream()
                 .map(NoteService::toResponse)
                 .toList();
     }

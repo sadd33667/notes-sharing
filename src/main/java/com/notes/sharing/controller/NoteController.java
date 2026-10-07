@@ -50,8 +50,13 @@ public class NoteController {
 
     @GetMapping
     public ResponseEntity<List<NoteResponse>> myNotes(
+            @RequestParam(required = false) String type,
             org.springframework.security.core.Authentication auth) {
-        return ResponseEntity.ok(noteService.myNotes((Long) auth.getPrincipal()));
+        Long userId = (Long) auth.getPrincipal();
+        if (type != null) {
+            return ResponseEntity.ok(noteService.myNotesByType(userId, type));
+        }
+        return ResponseEntity.ok(noteService.myNotes(userId));
     }
 
     @GetMapping("/upcoming")

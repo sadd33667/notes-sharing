@@ -15,4 +15,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     List<Note> findUpcoming(@Param("ownerId") Long ownerId,
                            @Param("from") LocalDateTime from,
                            @Param("to") LocalDateTime to);
+
+    @Query("SELECT n FROM Note n WHERE n.owner.userID = :ownerId AND (:type IS NULL OR n.noteType = :type) ORDER BY n.createdAt DESC")
+    List<Note> findMineFiltered(@Param("ownerId") Long ownerId, @Param("type") String type);
 }
