@@ -4,8 +4,10 @@ import com.notes.sharing.dto.AuthResponse;
 import com.notes.sharing.dto.LoginRequest;
 import com.notes.sharing.dto.RegisterRequest;
 import com.notes.sharing.entity.User;
+import com.notes.sharing.entity.UserSettings;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.UserRepository;
+import com.notes.sharing.repository.UserSettingsRepository;
 import com.notes.sharing.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,25 +19,29 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final UserSettingsRepository settingsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
-        if (userRepository.findByEmail(req.getEmail()).isPresent()) {
+        String username = req.getUsername().trim();
+        String email = req.getEmail().trim();
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already registered");
         }
-        if (userRepository.findByUsername(req.getUsername()).isPresent()) {
+        if (userRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("Username already taken");
         }
 
         User user = User.builder()
-                .username(req.getUsername())
-                .email(req.getEmail())
+                .username(username)
+                .email(email)
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .build();
 
         User saved = userRepository.save(user);
+        settingsRepository.save(UserSettings.builder().user(saved).build());
         String token = jwtService.generateToken(saved.getUserID(), saved.getEmail());
         return new AuthResponse(token, saved.getUserID(), saved.getUsername());
     }

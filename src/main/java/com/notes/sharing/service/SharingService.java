@@ -3,10 +3,12 @@ package com.notes.sharing.service;
 import com.notes.sharing.dto.NoteResponse;
 import com.notes.sharing.entity.Note;
 import com.notes.sharing.entity.NoteSharing;
+import com.notes.sharing.entity.Notification;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
+import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class SharingService {
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
     private final NoteSharingRepository sharingRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public void share(Long noteId, Long ownerId, Long targetUserId, String permission) {
@@ -40,6 +43,12 @@ public class SharingService {
 
         sharing.setPermission(permission != null ? permission : "view");
         sharingRepository.save(sharing);
+        notificationRepository.save(Notification.builder()
+                .notifier(note.getOwner())
+                .notified(target)
+                .type("share")
+                .note(note)
+                .build());
     }
 
     @Transactional

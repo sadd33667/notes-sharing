@@ -2,6 +2,7 @@ package com.notes.sharing.service;
 
 import com.notes.sharing.dto.FriendshipResponse;
 import com.notes.sharing.entity.Friendship;
+import com.notes.sharing.entity.Notification;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.FriendshipRepository;
@@ -46,6 +47,12 @@ public class FriendshipService {
                 .status("pending")
                 .build();
         Friendship saved = friendshipRepository.save(friendship);
+        notificationRepository.save(Notification.builder()
+                .notifier(sender)
+                .notified(target)
+                .type("friend_request")
+                .friendship(saved)
+                .build());
         return toResponse(saved, senderId);
     }
 
@@ -79,6 +86,14 @@ public class FriendshipService {
         }
         f.setStatus(accept ? "accepted" : "rejected");
         friendshipRepository.save(f);
+        if (accept) {
+            notificationRepository.save(Notification.builder()
+                    .notifier(f.getSUser())
+                    .notified(f.getFUser())
+                    .type("friend_accept")
+                    .friendship(f)
+                    .build());
+        }
     }
 
     @Transactional
