@@ -45,9 +45,8 @@ public class SharingService {
                 .findFirst()
                 .orElseGet(() -> NoteSharing.builder().note(note).user(target).build());
 
-        sharing.setPermission(permission != null ? permission : "view");
-        if (!"view".equalsIgnoreCase(sharing.getPermission())
-                && !"edit".equalsIgnoreCase(sharing.getPermission())) {
+        sharing.setPermission(permission != null ? permission.toLowerCase() : "view");
+        if (!"view".equals(sharing.getPermission()) && !"edit".equals(sharing.getPermission())) {
             throw new IllegalArgumentException("Permission must be view or edit");
         }
         sharingRepository.save(sharing);

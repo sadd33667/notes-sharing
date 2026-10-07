@@ -44,6 +44,7 @@ public class NoteService {
                 && !"shared".equalsIgnoreCase(note.getVisibility())) {
             throw new IllegalArgumentException("Visibility must be private, public or shared");
         }
+        note.setVisibility(note.getVisibility().toLowerCase());
 
         Note saved = noteRepository.save(note);
         return toResponse(saved);
@@ -110,6 +111,9 @@ public class NoteService {
 
     @Transactional(readOnly = true)
     public List<NoteResponse> upcoming(Long ownerId, LocalDateTime from, LocalDateTime to) {
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("From date must be before to date");
+        }
         return noteRepository.findUpcoming(ownerId, from, to).stream()
                 .map(NoteService::toResponse)
                 .toList();
