@@ -1,6 +1,7 @@
 package com.notes.sharing.controller;
 
 import com.notes.sharing.dto.AuthResponse;
+import com.notes.sharing.dto.ChangePasswordRequest;
 import com.notes.sharing.dto.LoginRequest;
 import com.notes.sharing.dto.RegisterRequest;
 import com.notes.sharing.service.AuthService;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,9 +30,9 @@ public class AuthController {
 
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(
-            @RequestBody Map<String, String> body,
+            @Valid @RequestBody ChangePasswordRequest body,
             org.springframework.security.core.Authentication auth) {
-        authService.changePassword((Long) auth.getPrincipal(), body.get("oldPassword"), body.get("newPassword"));
+        authService.changePassword((Long) auth.getPrincipal(), body.getOldPassword(), body.getNewPassword());
         return ResponseEntity.ok().build();
     }
 }

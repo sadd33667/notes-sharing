@@ -30,6 +30,13 @@ public class FriendshipService {
         if (sender.getUserID().equals(target.getUserID())) {
             throw new IllegalArgumentException("Cannot add yourself");
         }
+        boolean exists = friendshipRepository.findForUser(senderId).stream()
+                .anyMatch(f -> (f.getFUser().getUserID().equals(target.getUserID())
+                        || f.getSUser().getUserID().equals(target.getUserID()))
+                        && !"rejected".equalsIgnoreCase(f.getStatus()));
+        if (exists) {
+            throw new IllegalArgumentException("Friend request already exists");
+        }
 
         Friendship friendship = Friendship.builder()
                 .fUser(sender)

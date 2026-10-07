@@ -41,6 +41,7 @@ public class NoteService {
         return toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
     public NoteResponse getNote(Long noteId, Long requesterId) {        Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
 
@@ -84,6 +85,7 @@ public class NoteService {
         noteRepository.delete(note);
     }
 
+    @Transactional(readOnly = true)
     public List<NoteResponse> myNotes(Long ownerId) {
         return noteRepository.findMineFiltered(ownerId, null).stream()
                 .map(NoteService::toResponse)
@@ -96,6 +98,7 @@ public class NoteService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<NoteResponse> upcoming(Long ownerId, LocalDateTime from, LocalDateTime to) {
         return noteRepository.findUpcoming(ownerId, from, to).stream()
                 .map(NoteService::toResponse)
