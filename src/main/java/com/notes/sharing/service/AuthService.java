@@ -26,7 +26,7 @@ public class AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest req) {
         String username = req.getUsername().trim();
-        String email = req.getEmail().trim();
+        String email = req.getEmail().trim().toLowerCase();
         if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already registered");
         }
@@ -47,7 +47,7 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest req) {
-        User user = userRepository.findByEmail(req.getEmail())
+        User user = userRepository.findByEmail(req.getEmail().trim().toLowerCase())
                 .orElseThrow(() -> new NotFoundException("Invalid email or password"));
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPasswordHash())) {
