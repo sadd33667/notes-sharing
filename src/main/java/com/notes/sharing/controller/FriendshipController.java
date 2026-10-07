@@ -1,5 +1,6 @@
 package com.notes.sharing.controller;
 
+import com.notes.sharing.dto.FriendRequest;
 import com.notes.sharing.dto.FriendshipResponse;
 import com.notes.sharing.service.FriendshipService;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/friends")
@@ -20,10 +21,10 @@ public class FriendshipController {
 
     @PostMapping("/request")
     public ResponseEntity<FriendshipResponse> sendRequest(
-            @RequestBody Map<String, String> body,
+            @Valid @RequestBody FriendRequest body,
             Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                friendshipService.sendRequest((Long) auth.getPrincipal(), body.get("username")));
+                friendshipService.sendRequest((Long) auth.getPrincipal(), body.getUsername()));
     }
 
     @GetMapping

@@ -7,6 +7,7 @@ import com.notes.sharing.entity.User;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
+import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
     private final NoteSharingRepository sharingRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public NoteResponse createNote(CreateNoteRequest req) {
@@ -82,6 +84,8 @@ public class NoteService {
         if (!note.getOwner().getUserID().equals(requesterId)) {
             throw new NotFoundException("Note not found: " + noteId);
         }
+        notificationRepository.deleteByNote(noteId);
+        sharingRepository.deleteByNote(noteId);
         noteRepository.delete(note);
     }
 

@@ -5,6 +5,7 @@ import com.notes.sharing.entity.Friendship;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.FriendshipRepository;
+import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public FriendshipResponse sendRequest(Long senderId, String targetUsername) {
@@ -87,6 +89,7 @@ public class FriendshipService {
         if (!f.getFUser().getUserID().equals(userId) && !f.getSUser().getUserID().equals(userId)) {
             throw new NotFoundException("Request not found");
         }
+        notificationRepository.deleteByFriendship(relationshipId);
         friendshipRepository.delete(f);
     }
 

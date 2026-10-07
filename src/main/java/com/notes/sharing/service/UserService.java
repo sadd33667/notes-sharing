@@ -5,6 +5,9 @@ import com.notes.sharing.dto.SettingsResponse;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.entity.UserSettings;
 import com.notes.sharing.exception.NotFoundException;
+import com.notes.sharing.repository.FriendshipRepository;
+import com.notes.sharing.repository.NoteSharingRepository;
+import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import com.notes.sharing.repository.UserSettingsRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserSettingsRepository settingsRepository;
+    private final NoteSharingRepository sharingRepository;
+    private final FriendshipRepository friendshipRepository;
+    private final NotificationRepository notificationRepository;
 
     public ProfileResponse getProfile(Long userId) {
         return toProfile(getUser(userId));
@@ -59,6 +65,9 @@ public class UserService {
 
     @Transactional
     public void deleteAccount(Long userId) {
+        notificationRepository.deleteByUser(userId);
+        sharingRepository.deleteByUser(userId);
+        friendshipRepository.deleteByUser(userId);
         userRepository.delete(getUser(userId));
     }
 
