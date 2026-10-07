@@ -2,13 +2,13 @@ package com.notes.sharing.controller;
 
 import com.notes.sharing.dto.ProfileResponse;
 import com.notes.sharing.dto.SettingsResponse;
+import com.notes.sharing.dto.UpdateProfileRequest;
+import com.notes.sharing.dto.UpdateSettingsRequest;
 import com.notes.sharing.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users/me")
@@ -24,7 +24,7 @@ public class UserController {
 
     @PutMapping
     public ResponseEntity<ProfileResponse> updateProfile(
-            @RequestBody Map<String, String> body, Authentication auth) {
+            @RequestBody UpdateProfileRequest body, Authentication auth) {
         return ResponseEntity.ok(userService.updateProfile((Long) auth.getPrincipal(), body));
     }
 
@@ -35,7 +35,7 @@ public class UserController {
 
     @PutMapping("/settings")
     public ResponseEntity<SettingsResponse> updateSettings(
-            @RequestBody Map<String, Object> body, Authentication auth) {
+            @RequestBody UpdateSettingsRequest body, Authentication auth) {
         return ResponseEntity.ok(userService.updateSettings((Long) auth.getPrincipal(), body));
     }
 

@@ -2,6 +2,8 @@ package com.notes.sharing.service;
 
 import com.notes.sharing.dto.ProfileResponse;
 import com.notes.sharing.dto.SettingsResponse;
+import com.notes.sharing.dto.UpdateProfileRequest;
+import com.notes.sharing.dto.UpdateSettingsRequest;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.entity.UserSettings;
 import com.notes.sharing.exception.NotFoundException;
@@ -13,8 +15,6 @@ import com.notes.sharing.repository.UserSettingsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +31,12 @@ public class UserService {
     }
 
     @Transactional
-    public ProfileResponse updateProfile(Long userId, Map<String, String> body) {
+    public ProfileResponse updateProfile(Long userId, UpdateProfileRequest body) {
         User user = getUser(userId);
-        if (body.containsKey("bio")) user.setBio(body.get("bio"));
-        if (body.containsKey("phoneNumber")) user.setPhoneNumber(body.get("phoneNumber"));
-        if (body.containsKey("image")) user.setImage(body.get("image"));
-        if (body.containsKey("secondaryEmail")) user.setSecondaryEmail(body.get("secondaryEmail"));
+        if (body.getBio() != null) user.setBio(body.getBio());
+        if (body.getPhoneNumber() != null) user.setPhoneNumber(body.getPhoneNumber());
+        if (body.getImage() != null) user.setImage(body.getImage());
+        if (body.getSecondaryEmail() != null) user.setSecondaryEmail(body.getSecondaryEmail());
         return toProfile(userRepository.save(user));
     }
 
@@ -47,14 +47,14 @@ public class UserService {
     }
 
     @Transactional
-    public SettingsResponse updateSettings(Long userId, Map<String, Object> body) {
+    public SettingsResponse updateSettings(Long userId, UpdateSettingsRequest body) {
         UserSettings s = settingsRepository.findById(userId).orElseGet(() ->
                 UserSettings.builder().user(getUser(userId)).build());
-        if (body.containsKey("theme")) s.setTheme((String) body.get("theme"));
-        if (body.containsKey("language")) s.setLanguage((String) body.get("language"));
-        if (body.containsKey("twoFactorEnabled")) s.setTwoFactorEnabled((Boolean) body.get("twoFactorEnabled"));
-        if (body.containsKey("notificationsEnabled"))
-            s.setNotificationsEnabled((Boolean) body.get("notificationsEnabled"));
+        if (body.getTheme() != null) s.setTheme(body.getTheme());
+        if (body.getLanguage() != null) s.setLanguage(body.getLanguage());
+        if (body.getTwoFactorEnabled() != null) s.setTwoFactorEnabled(body.getTwoFactorEnabled());
+        if (body.getNotificationsEnabled() != null)
+            s.setNotificationsEnabled(body.getNotificationsEnabled());
         return toSettings(settingsRepository.save(s));
     }
 
