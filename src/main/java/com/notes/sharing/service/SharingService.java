@@ -36,6 +36,10 @@ public class SharingService {
         User target = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new NotFoundException("User not found: " + targetUserId));
 
+        if (target.getUserID().equals(ownerId)) {
+            throw new IllegalArgumentException("Cannot share with yourself");
+        }
+
         NoteSharing sharing = sharingRepository.findByNote_NoteID(noteId).stream()
                 .filter(s -> s.getUser().getUserID().equals(targetUserId))
                 .findFirst()

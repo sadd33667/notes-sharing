@@ -39,6 +39,12 @@ public class NoteService {
                 .visibility(req.getVisibility() != null ? req.getVisibility() : "private")
                 .build();
 
+        if (!"private".equalsIgnoreCase(note.getVisibility())
+                && !"public".equalsIgnoreCase(note.getVisibility())
+                && !"shared".equalsIgnoreCase(note.getVisibility())) {
+            throw new IllegalArgumentException("Visibility must be private, public or shared");
+        }
+
         Note saved = noteRepository.save(note);
         return toResponse(saved);
     }
@@ -71,7 +77,7 @@ public class NoteService {
         if (!isOwner && !canEdit) {
             throw new NotFoundException("Note not found: " + noteId);
         }
-        if (title != null) note.setTitle(title);
+        if (title != null && !title.isBlank()) note.setTitle(title);
         if (contents != null) note.setContents(contents);
         return toResponse(noteRepository.save(note));
     }

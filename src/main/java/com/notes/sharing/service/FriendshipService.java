@@ -84,6 +84,9 @@ public class FriendshipService {
         if (!f.getSUser().getUserID().equals(userId)) {
             throw new NotFoundException("Request not found");
         }
+        if (!"pending".equalsIgnoreCase(f.getStatus())) {
+            throw new IllegalArgumentException("Request already decided");
+        }
         f.setStatus(accept ? "accepted" : "rejected");
         friendshipRepository.save(f);
         if (accept) {
