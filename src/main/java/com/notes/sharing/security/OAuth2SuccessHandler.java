@@ -33,6 +33,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException, ServletException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
+        if (email == null) {
+            String login = oauthUser.getAttribute("login");
+            email = (login != null ? login : "github-user") + "@users.noreply.github.com";
+        }
         String name = oauthUser.getAttribute("name");
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {
