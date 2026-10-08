@@ -1,0 +1,90 @@
+package com.notes.sharing.service;
+
+import com.notes.sharing.dto.NoteResponse;
+import com.notes.sharing.entity.Note;
+import com.notes.sharing.entity.NoteSharing;
+import com.notes.sharing.entity.Notification;
+import com.notes.sharing.entity.User;
+import com.notes.sharing.exception.NotFoundException;
+import com.notes.sharing.repository.NoteRepository;
+import com.notes.sharing.repository.NoteSharingRepository;
+import com.notes.sharing.repository.NotificationRepository;
+import com.notes.sharing.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class SharingService {
+
+    private final NoteRepository noteRepository;
+    private final UserRepository userRepository;
+    private final NoteSharingRepository sharingRepository;
+    private final NotificationRepository notificationRepository;
+
+    @Transactional
+    public void share(Long noteId, Long ownerId, Long targetUserId, String permission) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+
+        if (!note.getOwner().getUserID().equals(ownerId)) {
+            throw new NotFoundException("Note not found: " + noteId);
+        }
+        User target = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new NotFoundException("User not found: " + targetUserId));
+
+        if (target.getUserID().equals(ownerId)) {
+            throw new IllegalArgumentException("Cannot share with yourself");
+        }
+
+        NoteSharing sharing = sharingRepository.findByNote_NoteID(noteId).stream()
+                .filter(s -> s.getUser().getUserID().equals(targetUserId))
+                .findFirst()
+                .orElseGet(() -> NoteSharing.builder().note(note).user(target).build());
+
+        sharing.setPermission(permission != null ? permission.toLowerCase() : "view");
+        if (!"view".equals(sharing.getPermission()) && !"edit".equals(sharing.getPermission())) {
+            throw new IllegalArgumentException("Permission must be view or edit");
+        }
+        sharingRepository.save(sharing);
+        notificationRepository.save(Notification.builder()
+                .notifier(note.getOwner())
+                .notified(target)
+                .type("share")
+                .note(note)
+                .build());
+    }
+
+    @Transactional
+    public void unshare(Long noteId, Long ownerId, Long targetUserId) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+
+        if (!note.getOwner().getUserID().equals(ownerId)) {
+            throw new NotFoundException("Note not found: " + noteId);
+        }
+        sharingRepository.findByNote_NoteID(noteId).stream()
+                .filter(s -> s.getUser().getUserID().equals(targetUserId))
+                .findFirst()
+                .ifPresent(sharingRepository::delete);
+    }
+
+    public List<NoteResponse> sharedWithMe(Long userId) {
+        return sharingRepository.findByUser_UserID(userId).stream()
+                .map(s -> NoteService.toResponse(s.getNote()))
+                .toList();
+    }
+
+    @Transactional
+    public void setFavorite(Long noteId, Long userId, boolean favorite) {
+        NoteSharing sharing = sharingRepository.findByNote_NoteID(noteId).stream()
+                .filter(s -> s.getUser().getUserID().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+        sharing.setIsFavorite(favorite);
+        sharingRepository.save(sharing);
+    }
+}
