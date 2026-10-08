@@ -1,5 +1,6 @@
 package com.notes.sharing.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,9 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
+    @Value("${spring.security.oauth2.client.registration.github.client-id:change-me}")
+    private String githubClientId;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -36,8 +40,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler));
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        if (!"change-me".equals(githubClientId)) {
+            http.oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler));
+        }
         return http.build();
     }
 }
