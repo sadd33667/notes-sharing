@@ -35,7 +35,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String email = oauthUser.getAttribute("email");
         if (email == null) {
             String login = oauthUser.getAttribute("login");
-            email = (login != null ? login : "github-user") + "@users.noreply.github.com";
+            email = (login != null ? login : "oauth-user") + "@oauth.local";
         }
         String name = oauthUser.getAttribute("name");
 

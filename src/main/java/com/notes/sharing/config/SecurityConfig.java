@@ -21,8 +21,8 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    @Value("${spring.security.oauth2.client.registration.github.client-id:change-me}")
-    private String githubClientId;
+    @Value("${spring.security.oauth2.client.registration.google.client-id:change-me}")
+    private String oauthClientId;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        if (!"change-me".equals(githubClientId)) {
+        if (!"change-me".equals(oauthClientId)) {
             http.oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler));
         }
         return http.build();
