@@ -115,6 +115,13 @@ public class NoteService {
     }
 
     @Transactional(readOnly = true)
+    public NoteResponse getMyNoteByNumber(Long ownerId, int number) {
+        Note note = noteRepository.findByOwnerAndNumber(ownerId, number)
+                .orElseThrow(() -> new NotFoundException(1002, "No note number " + number + " for you"));
+        return noteMapper.toResponse(note);
+    }
+
+    @Transactional(readOnly = true)
     public List<NoteResponse> upcoming(Long ownerId, LocalDateTime from, LocalDateTime to) {
         if (from.isAfter(to)) {
             throw new ConflictException(3007, "From date must be before to date");

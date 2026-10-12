@@ -41,4 +41,23 @@ class CreateNoteTest {
         assertEquals("First note", res.getTitle());
         assertEquals(user.getUserID(), res.getOwnerId());
     }
+
+    @Test
+    void myNotesNumberedPerUser() {
+        String tag = String.valueOf(System.nanoTime());
+        User user = userRepository.save(User.builder()
+                .username("num" + tag)
+                .email("num" + tag + "@test.com")
+                .passwordHash("hash")
+                .build());
+
+        NoteResponse first = noteService.createNote(CreateNoteRequest.builder()
+                .ownerId(user.getUserID()).title("One").contents("1").build());
+        NoteResponse second = noteService.createNote(CreateNoteRequest.builder()
+                .ownerId(user.getUserID()).title("Two").contents("2").build());
+
+        assertEquals(1, first.getUserNoteNumber());
+        assertEquals(2, second.getUserNoteNumber());
+        assertEquals("Two", noteService.getMyNoteByNumber(user.getUserID(), 2).getTitle());
+    }
 }

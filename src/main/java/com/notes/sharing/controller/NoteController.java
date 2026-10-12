@@ -60,6 +60,13 @@ public class NoteController {
         return ResponseEntity.ok(noteService.myNotes(userId));
     }
 
+    @GetMapping("/number/{n}")
+    public ResponseEntity<NoteResponse> getByNumber(
+            @PathVariable int n,
+            @CurrentUserId Long userId) {
+        return ResponseEntity.ok(noteService.getMyNoteByNumber(userId, n));
+    }
+
     @GetMapping("/upcoming")
     public ResponseEntity<List<NoteResponse>> upcoming(
             @RequestParam String from,
