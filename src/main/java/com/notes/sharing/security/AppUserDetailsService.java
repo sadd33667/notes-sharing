@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+
 // Tells Spring how to load my users. Spring itself compares passwords with BCrypt.
 @Service
 @RequiredArgsConstructor

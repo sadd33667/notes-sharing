@@ -36,4 +36,5 @@ public class AuthController {
         authService.changePassword(userId, body.getOldPassword(), body.getNewPassword());
         return ResponseEntity.ok().build();
     }
+    
 }
