@@ -4,6 +4,7 @@ import com.notes.sharing.dto.CreateNoteRequest;
 import com.notes.sharing.dto.NoteResponse;
 import com.notes.sharing.entity.Note;
 import com.notes.sharing.entity.User;
+import com.notes.sharing.mapper.NoteMapper;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
@@ -24,6 +25,7 @@ public class NoteService {
     private final UserRepository userRepository;
     private final NoteSharingRepository sharingRepository;
     private final NotificationRepository notificationRepository;
+    private final NoteMapper noteMapper;
 
     @Transactional
     public NoteResponse createNote(CreateNoteRequest req) {
@@ -47,7 +49,7 @@ public class NoteService {
         note.setVisibility(note.getVisibility().toLowerCase());
 
         Note saved = noteRepository.save(note);
-        return toResponse(saved);
+        return noteMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +64,7 @@ public class NoteService {
         if (!isOwner && !isShared && !isPublic) {
             throw new NotFoundException("Note not found: " + noteId);
         }
-        return toResponse(note);
+        return noteMapper.toResponse(note);
     }
 
     @Transactional
@@ -80,7 +82,7 @@ public class NoteService {
         }
         if (title != null && !title.isBlank()) note.setTitle(title);
         if (contents != null) note.setContents(contents);
-        return toResponse(noteRepository.save(note));
+        return noteMapper.toResponse(noteRepository.save(note));
     }
 
     @Transactional
@@ -99,13 +101,13 @@ public class NoteService {
     @Transactional(readOnly = true)
     public List<NoteResponse> myNotes(Long ownerId) {
         return noteRepository.findMineFiltered(ownerId, null).stream()
-                .map(NoteService::toResponse)
+                .map(noteMapper::toResponse)
                 .toList();
     }
 
     public List<NoteResponse> myNotesByType(Long ownerId, String type) {
         return noteRepository.findMineFiltered(ownerId, type).stream()
-                .map(NoteService::toResponse)
+                .map(noteMapper::toResponse)
                 .toList();
     }
 
@@ -115,7 +117,7 @@ public class NoteService {
             throw new IllegalArgumentException("From date must be before to date");
         }
         return noteRepository.findUpcoming(ownerId, from, to).stream()
-                .map(NoteService::toResponse)
+                .map(noteMapper::toResponse)
                 .toList();
     }
 
@@ -128,20 +130,7 @@ public class NoteService {
             throw new NotFoundException("Note not found: " + noteId);
         }
         note.setIsPinned(pinned);
-        return toResponse(noteRepository.save(note));
+        return noteMapper.toResponse(noteRepository.save(note));
     }
 
-    public static NoteResponse toResponse(Note n) {
-        return NoteResponse.builder()
-                .noteID(n.getNoteID())
-                .ownerId(n.getOwner().getUserID())
-                .title(n.getTitle())
-                .contents(n.getContents())
-                .noteType(n.getNoteType())
-                .color(n.getColor())
-                .isPinned(n.getIsPinned())
-                .createdAt(n.getCreatedAt())
-                .visibility(n.getVisibility())
-                .build();
-    }
 }

@@ -5,6 +5,7 @@ import com.notes.sharing.entity.Note;
 import com.notes.sharing.entity.NoteSharing;
 import com.notes.sharing.entity.Notification;
 import com.notes.sharing.entity.User;
+import com.notes.sharing.mapper.NoteMapper;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
@@ -24,6 +25,7 @@ public class SharingService {
     private final UserRepository userRepository;
     private final NoteSharingRepository sharingRepository;
     private final NotificationRepository notificationRepository;
+    private final NoteMapper noteMapper;
 
     @Transactional
     public void share(Long noteId, Long ownerId, Long targetUserId, String permission) {
@@ -74,7 +76,7 @@ public class SharingService {
 
     public List<NoteResponse> sharedWithMe(Long userId) {
         return sharingRepository.findByUser_UserID(userId).stream()
-                .map(s -> NoteService.toResponse(s.getNote()))
+                .map(s -> noteMapper.toResponse(s.getNote()))
                 .toList();
     }
 

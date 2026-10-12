@@ -9,7 +9,11 @@ import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.UserRepository;
 import com.notes.sharing.repository.UserSettingsRepository;
 import com.notes.sharing.security.JwtService;
+import com.notes.sharing.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,7 @@ public class AuthService {
     private final UserSettingsRepository settingsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
@@ -47,14 +52,18 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest req) {
-        User user = userRepository.findByEmail(req.getEmail().trim().toLowerCase())
-                .orElseThrow(() -> new NotFoundException("Invalid email or password"));
-
-        if (!passwordEncoder.matches(req.getPassword(), user.getPasswordHash())) {
+        // Spring itself checks email + BCrypt password, I only ask it.
+        Authentication auth;
+        try {
+            auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    req.getEmail().trim().toLowerCase(), req.getPassword()));
+        } catch (Exception e) {
             throw new NotFoundException("Invalid email or password");
         }
-
-        String token = jwtService.generateToken(user.getUserID(), user.getEmail());
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        String token = jwtService.generateToken(principal.getUserId(), principal.getEmail());
+        User user = userRepository.findById(principal.getUserId())
+                .orElseThrow(() -> new NotFoundException("Invalid email or password"));
         return new AuthResponse(token, user.getUserID(), user.getUsername());
     }
 

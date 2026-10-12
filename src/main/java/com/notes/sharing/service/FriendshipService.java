@@ -4,6 +4,7 @@ import com.notes.sharing.dto.FriendshipResponse;
 import com.notes.sharing.entity.Friendship;
 import com.notes.sharing.entity.Notification;
 import com.notes.sharing.entity.User;
+import com.notes.sharing.mapper.UserMapper;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.FriendshipRepository;
 import com.notes.sharing.repository.NotificationRepository;
@@ -22,6 +23,7 @@ public class FriendshipService {
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final UserMapper userMapper;
 
     @Transactional
     public FriendshipResponse sendRequest(Long senderId, String targetUsername) {
@@ -53,14 +55,14 @@ public class FriendshipService {
                 .type("friend_request")
                 .friendship(saved)
                 .build());
-        return toResponse(saved, senderId);
+        return userMapper.toFriendship(saved, senderId);
     }
 
     public List<FriendshipResponse> myFriends(Long userId) {
         List<FriendshipResponse> out = new ArrayList<>();
         for (Friendship f : friendshipRepository.findForUser(userId)) {
             if ("accepted".equalsIgnoreCase(f.getStatus())) {
-                out.add(toResponse(f, userId));
+                out.add(userMapper.toFriendship(f, userId));
             }
         }
         return out;
@@ -70,7 +72,7 @@ public class FriendshipService {
         List<FriendshipResponse> out = new ArrayList<>();
         for (Friendship f : friendshipRepository.findForUser(userId)) {
             if ("pending".equalsIgnoreCase(f.getStatus()) && f.getSUser().getUserID().equals(userId)) {
-                out.add(toResponse(f, userId));
+                out.add(userMapper.toFriendship(f, userId));
             }
         }
         return out;
@@ -111,12 +113,4 @@ public class FriendshipService {
         friendshipRepository.delete(f);
     }
 
-    private static FriendshipResponse toResponse(Friendship f, Long viewerId) {
-        User other = f.getFUser().getUserID().equals(viewerId) ? f.getSUser() : f.getFUser();
-        return FriendshipResponse.builder()
-                .relationshipID(f.getRelationshipID())
-                .friendUsername(other.getUsername())
-                .status(f.getStatus())
-                .build();
-    }
 }

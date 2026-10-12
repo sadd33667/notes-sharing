@@ -8,14 +8,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+// Reads my JWT from the header once per request and tells Spring who I am.
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -33,9 +34,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 Long userId = jwtService.extractUserId(header.substring(7));
                 User user = userRepository.findById(userId).orElse(null);
                 if (user != null) {
+                    UserPrincipal principal =
+                            new UserPrincipal(user.getUserID(), user.getEmail(), user.getPasswordHash());
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
-                                    userId, null, List.of(new SimpleGrantedAuthority("USER")));
+                                    principal, null, List.of(new SimpleGrantedAuthority("USER")));
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (Exception e) {

@@ -24,9 +24,9 @@ public class CurrentUserIdArgumentResolver implements HandlerMethodArgumentResol
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mav,
                                   NativeWebRequest request, WebDataBinderFactory binder) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof Long userId)) {
-            throw new AccessDeniedException("Not authenticated");
+        if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+            return principal.getUserId();
         }
-        return userId;
+        throw new AccessDeniedException("Not authenticated");
     }
 }
