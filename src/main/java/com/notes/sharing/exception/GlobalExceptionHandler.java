@@ -7,10 +7,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
 
 // All my API errors look the same: { "error": "message" }
+//
+// When each one happens:
+// - 404 NotFound: the thing really does not exist (bad user/note/request/notification
+//   id, or login with unknown email). Same message for wrong password on purpose.
+// - 403 Forbidden: it exists but it is not yours (private note, edit/delete/pin/share
+//   without rights, answering or removing someone else's friendship, reading
+//   someone else's notification, bad or missing token on protected routes).
+// - 409 Conflict: duplicate email/username, weak password rules, bad permission or
+//   visibility value, duplicate or already-decided friend request, sharing with
+//   yourself, from-date after to-date.
+// - 400 Bad Request: missing fields (validation) or bad calendar date format.
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 404 - note/user/friend/request not found (also used to hide private stuff)
+    // 404 - the thing really does not exist.
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, String>> notFound(NotFoundException e) {
         return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
