@@ -5,6 +5,7 @@ import com.notes.sharing.dto.NoteResponse;
 import com.notes.sharing.entity.Note;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.mapper.NoteMapper;
+import com.notes.sharing.exception.ForbiddenException;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
@@ -62,7 +63,7 @@ public class NoteService {
         boolean isPublic = "public".equalsIgnoreCase(note.getVisibility());
 
         if (!isOwner && !isShared && !isPublic) {
-            throw new NotFoundException("Note not found: " + noteId);
+            throw new ForbiddenException("This note is private and not shared with you");
         }
         return noteMapper.toResponse(note);
     }
@@ -78,7 +79,7 @@ public class NoteService {
                         && "edit".equalsIgnoreCase(s.getPermission()));
 
         if (!isOwner && !canEdit) {
-            throw new NotFoundException("Note not found: " + noteId);
+            throw new ForbiddenException("Only the owner or an editor can change this note");
         }
         if (title != null && !title.isBlank()) note.setTitle(title);
         if (contents != null) note.setContents(contents);
@@ -91,7 +92,7 @@ public class NoteService {
                 .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
 
         if (!note.getOwner().getUserID().equals(requesterId)) {
-            throw new NotFoundException("Note not found: " + noteId);
+            throw new ForbiddenException("Only the owner can delete this note");
         }
         notificationRepository.deleteByNote(noteId);
         sharingRepository.deleteByNote(noteId);
@@ -127,7 +128,7 @@ public class NoteService {
                 .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
 
         if (!note.getOwner().getUserID().equals(requesterId)) {
-            throw new NotFoundException("Note not found: " + noteId);
+            throw new ForbiddenException("Only the owner can pin this note");
         }
         note.setIsPinned(pinned);
         return noteMapper.toResponse(noteRepository.save(note));

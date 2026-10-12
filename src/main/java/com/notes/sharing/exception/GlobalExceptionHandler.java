@@ -22,6 +22,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(409).body(Map.of("error", e.getMessage()));
     }
 
+    // 403 - you are logged in, but this is not yours.
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, String>> forbidden(ForbiddenException e) {
+        return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
+    }
+
     // 400 - wrong date format in calendar (?from&to= must be like 2026-01-01T00:00:00)
     @ExceptionHandler(java.time.format.DateTimeParseException.class)
     public ResponseEntity<Map<String, String>> badDate(java.time.format.DateTimeParseException e) {

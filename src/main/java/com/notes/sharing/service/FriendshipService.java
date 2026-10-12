@@ -5,6 +5,7 @@ import com.notes.sharing.entity.Friendship;
 import com.notes.sharing.entity.Notification;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.mapper.UserMapper;
+import com.notes.sharing.exception.ForbiddenException;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.FriendshipRepository;
 import com.notes.sharing.repository.NotificationRepository;
@@ -84,7 +85,7 @@ public class FriendshipService {
                 .orElseThrow(() -> new NotFoundException("Request not found"));
 
         if (!f.getSUser().getUserID().equals(userId)) {
-            throw new NotFoundException("Request not found");
+            throw new ForbiddenException("Only the receiver can answer this request");
         }
         if (!"pending".equalsIgnoreCase(f.getStatus())) {
             throw new IllegalArgumentException("Request already decided");
@@ -107,7 +108,7 @@ public class FriendshipService {
                 .orElseThrow(() -> new NotFoundException("Request not found"));
 
         if (!f.getFUser().getUserID().equals(userId) && !f.getSUser().getUserID().equals(userId)) {
-            throw new NotFoundException("Request not found");
+            throw new ForbiddenException("You are not part of this friendship");
         }
         notificationRepository.deleteByFriendship(relationshipId);
         friendshipRepository.delete(f);

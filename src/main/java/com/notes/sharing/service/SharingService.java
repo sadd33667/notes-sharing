@@ -6,6 +6,7 @@ import com.notes.sharing.entity.NoteSharing;
 import com.notes.sharing.entity.Notification;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.mapper.NoteMapper;
+import com.notes.sharing.exception.ForbiddenException;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
@@ -33,7 +34,7 @@ public class SharingService {
                 .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
 
         if (!note.getOwner().getUserID().equals(ownerId)) {
-            throw new NotFoundException("Note not found: " + noteId);
+            throw new ForbiddenException("Only the owner can share this note");
         }
         User target = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new NotFoundException("User not found: " + targetUserId));
@@ -66,7 +67,7 @@ public class SharingService {
                 .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
 
         if (!note.getOwner().getUserID().equals(ownerId)) {
-            throw new NotFoundException("Note not found: " + noteId);
+            throw new ForbiddenException("Only the owner can unshare this note");
         }
         sharingRepository.findByNote_NoteID(noteId).stream()
                 .filter(s -> s.getUser().getUserID().equals(targetUserId))
