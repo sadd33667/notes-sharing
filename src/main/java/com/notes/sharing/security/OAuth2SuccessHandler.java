@@ -32,11 +32,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-        String email = oauthUser.getAttribute("email");
-        if (email == null) {
+        String oauthEmail = oauthUser.getAttribute("email");
+        if (oauthEmail == null) {
             String login = oauthUser.getAttribute("login");
-            email = (login != null ? login : "oauth-user") + "@oauth.local";
+            oauthEmail = (login != null ? login : "oauth-user") + "@oauth.local";
         }
+        final String email = oauthEmail;
         String name = oauthUser.getAttribute("name");
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {

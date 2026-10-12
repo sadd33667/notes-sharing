@@ -30,8 +30,8 @@ public class SharingController {
     public ResponseEntity<Void> unshare(
             @PathVariable Long id,
             @PathVariable Long userId,
-            @CurrentUserId Long userId) {
-        sharingService.unshare(id, userId, userId);
+            @CurrentUserId Long requesterId) {
+        sharingService.unshare(id, requesterId, userId);
         return ResponseEntity.noContent().build();
     }
 

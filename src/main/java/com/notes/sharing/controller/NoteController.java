@@ -54,7 +54,6 @@ public class NoteController {
     public ResponseEntity<List<NoteResponse>> myNotes(
             @RequestParam(required = false) String type,
             @CurrentUserId Long userId) {
-        Long userId = userId;
         if (type != null) {
             return ResponseEntity.ok(noteService.myNotesByType(userId, type));
         }
