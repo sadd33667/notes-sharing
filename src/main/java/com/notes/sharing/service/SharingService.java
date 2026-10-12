@@ -7,6 +7,7 @@ import com.notes.sharing.entity.Notification;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.mapper.NoteMapper;
 import com.notes.sharing.exception.ForbiddenException;
+import com.notes.sharing.exception.ConflictException;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
@@ -31,16 +32,16 @@ public class SharingService {
     @Transactional
     public void share(Long noteId, Long ownerId, Long targetUserId, String permission) {
         Note note = noteRepository.findById(noteId)
-                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+                .orElseThrow(() -> new NotFoundException(1002, "Note not found: " + noteId));
 
         if (!note.getOwner().getUserID().equals(ownerId)) {
-            throw new ForbiddenException("Only the owner can share this note");
+            throw new ForbiddenException(2005, "Only the owner can share this note");
         }
         User target = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new NotFoundException("User not found: " + targetUserId));
+                .orElseThrow(() -> new NotFoundException(1001, "User not found: " + targetUserId));
 
         if (target.getUserID().equals(ownerId)) {
-            throw new IllegalArgumentException("Cannot share with yourself");
+            throw new ConflictException(3005, "Cannot share with yourself");
         }
 
         NoteSharing sharing = sharingRepository.findByNote_NoteID(noteId).stream()
@@ -50,7 +51,7 @@ public class SharingService {
 
         sharing.setPermission(permission != null ? permission.toLowerCase() : "view");
         if (!"view".equals(sharing.getPermission()) && !"edit".equals(sharing.getPermission())) {
-            throw new IllegalArgumentException("Permission must be view or edit");
+            throw new ConflictException(3003, "Permission must be view or edit");
         }
         sharingRepository.save(sharing);
         notificationRepository.save(Notification.builder()
@@ -64,10 +65,10 @@ public class SharingService {
     @Transactional
     public void unshare(Long noteId, Long ownerId, Long targetUserId) {
         Note note = noteRepository.findById(noteId)
-                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+                .orElseThrow(() -> new NotFoundException(1002, "Note not found: " + noteId));
 
         if (!note.getOwner().getUserID().equals(ownerId)) {
-            throw new ForbiddenException("Only the owner can unshare this note");
+            throw new ForbiddenException(2005, "Only the owner can unshare this note");
         }
         sharingRepository.findByNote_NoteID(noteId).stream()
                 .filter(s -> s.getUser().getUserID().equals(targetUserId))
@@ -86,7 +87,7 @@ public class SharingService {
         NoteSharing sharing = sharingRepository.findByNote_NoteID(noteId).stream()
                 .filter(s -> s.getUser().getUserID().equals(userId))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("Note not found: " + noteId));
+                .orElseThrow(() -> new NotFoundException(1002, "Note not found: " + noteId));
         sharing.setIsFavorite(favorite);
         sharingRepository.save(sharing);
     }

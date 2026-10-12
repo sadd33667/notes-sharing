@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class NoteResponse {
     private Long noteID;
+    private Integer userNoteNumber;
     private Long ownerId;
     private String title;
     private String contents;

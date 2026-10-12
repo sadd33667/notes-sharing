@@ -23,7 +23,8 @@ com.notes.sharing/
 - Controller never calls repository directly.
 - Service holds sharing rules (view/edit) and friendship logic.
 - DTOs never contain PasswordHash.
-- Errors always return `{ "error": "..." }`.
+- Errors always return `{ "code": 1001, "error": "..." }` with my own numbers:
+  1xxx not found, 2xxx forbidden, 3xxx conflict, 4000 bad input.
 - No `Map` request bodies: every endpoint has a typed DTO.
 
 ## Endpoints (30)

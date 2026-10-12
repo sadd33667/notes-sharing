@@ -6,6 +6,7 @@ import com.notes.sharing.entity.Notification;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.mapper.UserMapper;
 import com.notes.sharing.exception.ForbiddenException;
+import com.notes.sharing.exception.ConflictException;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.FriendshipRepository;
 import com.notes.sharing.repository.NotificationRepository;
@@ -29,19 +30,19 @@ public class FriendshipService {
     @Transactional
     public FriendshipResponse sendRequest(Long senderId, String targetUsername) {
         User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(1001, "User not found"));
         User target = userRepository.findByUsername(targetUsername)
-                .orElseThrow(() -> new NotFoundException("User not found: " + targetUsername));
+                .orElseThrow(() -> new NotFoundException(1001, "User not found: " + targetUsername));
 
         if (sender.getUserID().equals(target.getUserID())) {
-            throw new IllegalArgumentException("Cannot add yourself");
+            throw new ConflictException(3005, "Cannot add yourself");
         }
         boolean exists = friendshipRepository.findForUser(senderId).stream()
                 .anyMatch(f -> (f.getFUser().getUserID().equals(target.getUserID())
                         || f.getSUser().getUserID().equals(target.getUserID()))
                         && !"rejected".equalsIgnoreCase(f.getStatus()));
         if (exists) {
-            throw new IllegalArgumentException("Friend request already exists");
+            throw new ConflictException(3006, "Friend request already exists");
         }
 
         Friendship friendship = Friendship.builder()
@@ -82,13 +83,13 @@ public class FriendshipService {
     @Transactional
     public void respond(Long relationshipId, Long userId, boolean accept) {
         Friendship f = friendshipRepository.findById(relationshipId)
-                .orElseThrow(() -> new NotFoundException("Request not found"));
+                .orElseThrow(() -> new NotFoundException(1003, "Request not found"));
 
         if (!f.getSUser().getUserID().equals(userId)) {
-            throw new ForbiddenException("Only the receiver can answer this request");
+            throw new ForbiddenException(2006, "Only the receiver can answer this request");
         }
         if (!"pending".equalsIgnoreCase(f.getStatus())) {
-            throw new IllegalArgumentException("Request already decided");
+            throw new ConflictException(3006, "Request already decided");
         }
         f.setStatus(accept ? "accepted" : "rejected");
         friendshipRepository.save(f);
@@ -105,10 +106,10 @@ public class FriendshipService {
     @Transactional
     public void remove(Long relationshipId, Long userId) {
         Friendship f = friendshipRepository.findById(relationshipId)
-                .orElseThrow(() -> new NotFoundException("Request not found"));
+                .orElseThrow(() -> new NotFoundException(1003, "Request not found"));
 
         if (!f.getFUser().getUserID().equals(userId) && !f.getSUser().getUserID().equals(userId)) {
-            throw new ForbiddenException("You are not part of this friendship");
+            throw new ForbiddenException(2006, "You are not part of this friendship");
         }
         notificationRepository.deleteByFriendship(relationshipId);
         friendshipRepository.delete(f);

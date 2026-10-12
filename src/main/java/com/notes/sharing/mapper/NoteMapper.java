@@ -11,6 +11,7 @@ public class NoteMapper {
     public NoteResponse toResponse(Note n) {
         return NoteResponse.builder()
                 .noteID(n.getNoteID())
+                .userNoteNumber(n.getUserNoteNumber())
                 .ownerId(n.getOwner().getUserID())
                 .title(n.getTitle())
                 .contents(n.getContents())

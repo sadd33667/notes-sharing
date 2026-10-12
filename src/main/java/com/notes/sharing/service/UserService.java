@@ -64,7 +64,7 @@ public class UserService {
 
     private User getUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(1001, "User not found"));
     }
 
     @Transactional

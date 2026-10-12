@@ -22,6 +22,8 @@ public class Note {
     private String title;
     @Column(length = 5000)
     private String contents;
+    // My own number inside my notes: 1, 2, 3... (noteID stays the global key).
+    private Integer userNoteNumber;
     private String noteType; // text, checklist, image
     private String color;
 

@@ -5,6 +5,7 @@ import com.notes.sharing.dto.LoginRequest;
 import com.notes.sharing.dto.RegisterRequest;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.entity.UserSettings;
+import com.notes.sharing.exception.ConflictException;
 import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.UserRepository;
 import com.notes.sharing.repository.UserSettingsRepository;
@@ -33,10 +34,10 @@ public class AuthService {
         String username = req.getUsername().trim();
         String email = req.getEmail().trim().toLowerCase();
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new ConflictException(3001, "Email already registered");
         }
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new IllegalArgumentException("Username already taken");
+            throw new ConflictException(3002, "Username already taken");
         }
 
         User user = User.builder()
@@ -73,7 +74,7 @@ public class AuthService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
-            throw new IllegalArgumentException("Old password is wrong");
+            throw new ConflictException(3008, "Old password is wrong");
         }
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);

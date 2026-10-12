@@ -35,7 +35,7 @@ public class NotificationService {
         Notification n = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new com.notes.sharing.exception.NotFoundException("Not found"));
         if (!n.getNotified().getUserID().equals(userId)) {
-            throw new ForbiddenException("This notification is not yours");
+            throw new ForbiddenException(2007, "This notification is not yours");
         }
         n.setIsRead(true);
         notificationRepository.save(n);
