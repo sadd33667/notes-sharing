@@ -3,28 +3,21 @@ package com.notes.sharing.controller;
 import com.notes.sharing.dto.FriendRequest;
 import com.notes.sharing.dto.FriendshipResponse;
 import com.notes.sharing.service.FriendshipService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.notes.sharing.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/friends")
-@RequiredArgsConstructor
 public class FriendshipController {
-
     private final FriendshipService friendshipService;
 
     @PostMapping("/request")
-    public ResponseEntity<FriendshipResponse> sendRequest(
-            @Valid @RequestBody FriendRequest body,
-            @CurrentUserId Long userId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                friendshipService.sendRequest(userId, body.getUsername()));
+    public ResponseEntity<FriendshipResponse> sendRequest(@Valid @RequestBody FriendRequest body, @CurrentUserId Long userId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(friendshipService.sendRequest(userId, body.getUsername()));
     }
 
     @GetMapping
@@ -53,5 +46,8 @@ public class FriendshipController {
     public ResponseEntity<Void> remove(@PathVariable Long id, @CurrentUserId Long userId) {
         friendshipService.remove(id, userId);
         return ResponseEntity.noContent().build();
+    }
+    public FriendshipController(final FriendshipService friendshipService) {
+        this.friendshipService = friendshipService;
     }
 }
