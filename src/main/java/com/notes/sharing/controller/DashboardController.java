@@ -4,7 +4,7 @@ import com.notes.sharing.dto.DashboardResponse;
 import com.notes.sharing.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import com.notes.sharing.security.CurrentUserId;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +17,7 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping
-    public ResponseEntity<DashboardResponse> stats(Authentication auth) {
-        return ResponseEntity.ok(dashboardService.stats((Long) auth.getPrincipal()));
+    public ResponseEntity<DashboardResponse> stats(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(dashboardService.stats(userId));
     }
 }

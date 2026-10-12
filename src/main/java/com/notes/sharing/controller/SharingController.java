@@ -6,7 +6,7 @@ import com.notes.sharing.service.SharingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import com.notes.sharing.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +21,8 @@ public class SharingController {
     public ResponseEntity<Void> share(
             @PathVariable Long id,
             @Valid @RequestBody ShareRequest req,
-            Authentication auth) {
-        sharingService.share(id, (Long) auth.getPrincipal(), req.getUserId(), req.getPermission());
+            @CurrentUserId Long userId) {
+        sharingService.share(id, userId, req.getUserId(), req.getPermission());
         return ResponseEntity.ok().build();
     }
 
@@ -30,22 +30,22 @@ public class SharingController {
     public ResponseEntity<Void> unshare(
             @PathVariable Long id,
             @PathVariable Long userId,
-            Authentication auth) {
-        sharingService.unshare(id, (Long) auth.getPrincipal(), userId);
+            @CurrentUserId Long userId) {
+        sharingService.unshare(id, userId, userId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/api/notes/shared-with-me")
-    public ResponseEntity<List<NoteResponse>> sharedWithMe(Authentication auth) {
-        return ResponseEntity.ok(sharingService.sharedWithMe((Long) auth.getPrincipal()));
+    public ResponseEntity<List<NoteResponse>> sharedWithMe(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(sharingService.sharedWithMe(userId));
     }
 
     @PutMapping("/api/notes/{id}/favorite")
     public ResponseEntity<Void> setFavorite(
             @PathVariable Long id,
             @RequestBody java.util.Map<String, Boolean> body,
-            Authentication auth) {
-        sharingService.setFavorite(id, (Long) auth.getPrincipal(),
+            @CurrentUserId Long userId) {
+        sharingService.setFavorite(id, userId,
                 body.getOrDefault("isFavorite", true));
         return ResponseEntity.ok().build();
     }

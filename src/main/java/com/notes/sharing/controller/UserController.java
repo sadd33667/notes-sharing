@@ -7,7 +7,7 @@ import com.notes.sharing.dto.UpdateSettingsRequest;
 import com.notes.sharing.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import com.notes.sharing.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,30 +18,30 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<ProfileResponse> getProfile(Authentication auth) {
-        return ResponseEntity.ok(userService.getProfile((Long) auth.getPrincipal()));
+    public ResponseEntity<ProfileResponse> getProfile(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(userService.getProfile(userId));
     }
 
     @PutMapping
     public ResponseEntity<ProfileResponse> updateProfile(
-            @RequestBody UpdateProfileRequest body, Authentication auth) {
-        return ResponseEntity.ok(userService.updateProfile((Long) auth.getPrincipal(), body));
+            @RequestBody UpdateProfileRequest body, @CurrentUserId Long userId) {
+        return ResponseEntity.ok(userService.updateProfile(userId, body));
     }
 
     @GetMapping("/settings")
-    public ResponseEntity<SettingsResponse> getSettings(Authentication auth) {
-        return ResponseEntity.ok(userService.getSettings((Long) auth.getPrincipal()));
+    public ResponseEntity<SettingsResponse> getSettings(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(userService.getSettings(userId));
     }
 
     @PutMapping("/settings")
     public ResponseEntity<SettingsResponse> updateSettings(
-            @RequestBody UpdateSettingsRequest body, Authentication auth) {
-        return ResponseEntity.ok(userService.updateSettings((Long) auth.getPrincipal(), body));
+            @RequestBody UpdateSettingsRequest body, @CurrentUserId Long userId) {
+        return ResponseEntity.ok(userService.updateSettings(userId, body));
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteAccount(Authentication auth) {
-        userService.deleteAccount((Long) auth.getPrincipal());
+    public ResponseEntity<Void> deleteAccount(@CurrentUserId Long userId) {
+        userService.deleteAccount(userId);
         return ResponseEntity.noContent().build();
     }
 }

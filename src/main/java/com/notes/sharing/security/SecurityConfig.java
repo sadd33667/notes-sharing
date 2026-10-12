@@ -1,4 +1,4 @@
-package com.notes.sharing.config;
+package com.notes.sharing.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,10 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.notes.sharing.security.JwtAuthFilter;
-import com.notes.sharing.security.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 
+// All security setup lives here in the security package:
+// password hashing, JWT filter, open vs protected paths, optional OAuth2.
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -24,6 +24,7 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.client.registration.google.client-id:change-me}")
     private String oauthClientId;
 
+    // BCrypt hashes passwords with a random salt each time.
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -41,6 +42,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        // OAuth2 only turns on when real credentials are set.
         if (!"change-me".equals(oauthClientId)) {
             http.oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler));
         }

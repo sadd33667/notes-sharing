@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import com.notes.sharing.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -27,8 +27,8 @@ public class NoteController {
     @GetMapping("/{id}")
     public ResponseEntity<NoteResponse> getOne(
             @PathVariable Long id,
-            Authentication auth) {
-        Long requesterId = (Long) auth.getPrincipal();
+            @CurrentUserId Long userId) {
+        Long requesterId = userId;
         return ResponseEntity.ok(noteService.getNote(id, requesterId));
     }
 
@@ -36,16 +36,16 @@ public class NoteController {
     public ResponseEntity<NoteResponse> update(
             @PathVariable Long id,
             @RequestBody UpdateNoteRequest body,
-            Authentication auth) {
-        Long requesterId = (Long) auth.getPrincipal();
+            @CurrentUserId Long userId) {
+        Long requesterId = userId;
         return ResponseEntity.ok(noteService.updateNote(id, requesterId, body.getTitle(), body.getContents()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id,
-            Authentication auth) {
-        Long requesterId = (Long) auth.getPrincipal();
+            @CurrentUserId Long userId) {
+        Long requesterId = userId;
         noteService.deleteNote(id, requesterId);
         return ResponseEntity.noContent().build();
     }
@@ -53,8 +53,8 @@ public class NoteController {
     @GetMapping
     public ResponseEntity<List<NoteResponse>> myNotes(
             @RequestParam(required = false) String type,
-            Authentication auth) {
-        Long userId = (Long) auth.getPrincipal();
+            @CurrentUserId Long userId) {
+        Long userId = userId;
         if (type != null) {
             return ResponseEntity.ok(noteService.myNotesByType(userId, type));
         }
@@ -65,9 +65,9 @@ public class NoteController {
     public ResponseEntity<List<NoteResponse>> upcoming(
             @RequestParam String from,
             @RequestParam String to,
-            Authentication auth) {
+            @CurrentUserId Long userId) {
         return ResponseEntity.ok(noteService.upcoming(
-                (Long) auth.getPrincipal(),
+                userId,
                 java.time.LocalDateTime.parse(from),
                 java.time.LocalDateTime.parse(to)));
     }
@@ -76,8 +76,8 @@ public class NoteController {
     public ResponseEntity<NoteResponse> setPinned(
             @PathVariable Long id,
             @RequestBody java.util.Map<String, Boolean> body,
-            Authentication auth) {
+            @CurrentUserId Long userId) {
         Boolean pinned = body.getOrDefault("isPinned", true);
-        return ResponseEntity.ok(noteService.setPinned(id, (Long) auth.getPrincipal(), pinned));
+        return ResponseEntity.ok(noteService.setPinned(id, userId, pinned));
     }
 }
