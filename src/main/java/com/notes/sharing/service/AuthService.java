@@ -59,19 +59,19 @@ public class AuthService {
             auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     req.getEmail().trim().toLowerCase(), req.getPassword()));
         } catch (Exception e) {
-            throw new NotFoundException("Invalid email or password");
+            throw new NotFoundException(1005, "Invalid email or password");
         }
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         String token = jwtService.generateToken(principal.getUserId(), principal.getEmail());
         User user = userRepository.findById(principal.getUserId())
-                .orElseThrow(() -> new NotFoundException("Invalid email or password"));
+                .orElseThrow(() -> new NotFoundException(1001, "Invalid email or password"));
         return new AuthResponse(token, user.getUserID(), user.getUsername());
     }
 
     @Transactional
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(1001, "User not found"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             throw new ConflictException(3008, "Old password is wrong");

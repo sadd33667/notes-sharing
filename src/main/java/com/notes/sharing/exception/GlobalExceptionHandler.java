@@ -9,7 +9,8 @@ import java.util.Map;
 // All my API errors look the same: { "code": 1001, "error": "message" }
 //
 // My own numbers (besides the HTTP status):
-// - 1xxx not found: 1001 user, 1002 note, 1003 friendship/request, 1004 notification.
+// - 1xxx not found: 1001 user, 1002 note, 1003 friendship/request, 1004 notification,
+//   1005 invalid credentials.
 // - 2xxx forbidden: 2001 private note, 2002 edit, 2003 delete, 2004 pin,
 //   2005 share, 2006 friendship, 2007 notification.
 // - 3xxx conflict: 3001 email, 3002 username, 3003 permission, 3004 visibility,

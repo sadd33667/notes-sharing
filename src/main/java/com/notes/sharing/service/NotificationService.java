@@ -33,7 +33,7 @@ public class NotificationService {
     @Transactional
     public void markRead(Long notificationId, Long userId) {
         Notification n = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new com.notes.sharing.exception.NotFoundException("Not found"));
+                .orElseThrow(() -> new com.notes.sharing.exception.NotFoundException(1004, "Notification not found"));
         if (!n.getNotified().getUserID().equals(userId)) {
             throw new ForbiddenException(2007, "This notification is not yours");
         }
