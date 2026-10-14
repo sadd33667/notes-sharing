@@ -2,6 +2,7 @@ package com.notes.sharing.controller;
 
 import com.notes.sharing.dto.CreateNoteRequest;
 import com.notes.sharing.dto.NoteResponse;
+import com.notes.sharing.dto.PinRequest;
 import com.notes.sharing.dto.UpdateNoteRequest;
 import com.notes.sharing.service.NoteService;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.notes.sharing.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -55,12 +57,12 @@ public class NoteController {
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<NoteResponse>> upcoming(@RequestParam String from, @RequestParam String to, @CurrentUserId Long userId) {
-        return ResponseEntity.ok(noteService.upcoming(userId, java.time.LocalDateTime.parse(from), java.time.LocalDateTime.parse(to)));
+        return ResponseEntity.ok(noteService.upcoming(userId, LocalDateTime.parse(from), LocalDateTime.parse(to)));
     }
 
     @PutMapping("/{id}/pin")
-    public ResponseEntity<NoteResponse> setPinned(@PathVariable Long id, @RequestBody java.util.Map<String, Boolean> body, @CurrentUserId Long userId) {
-        Boolean pinned = body.getOrDefault("isPinned", true);
+    public ResponseEntity<NoteResponse> setPinned(@PathVariable Long id, @RequestBody PinRequest body, @CurrentUserId Long userId) {
+        Boolean pinned = body.getIsPinned() != null ? body.getIsPinned() : true;
         return ResponseEntity.ok(noteService.setPinned(id, userId, pinned));
     }
     public NoteController(final NoteService noteService) {

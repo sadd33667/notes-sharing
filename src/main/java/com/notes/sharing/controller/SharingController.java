@@ -1,5 +1,6 @@
 package com.notes.sharing.controller;
 
+import com.notes.sharing.dto.FavoriteRequest;
 import com.notes.sharing.dto.NoteResponse;
 import com.notes.sharing.dto.ShareRequest;
 import com.notes.sharing.service.SharingService;
@@ -31,8 +32,9 @@ public class SharingController {
     }
 
     @PutMapping("/api/notes/{id}/favorite")
-    public ResponseEntity<Void> setFavorite(@PathVariable Long id, @RequestBody java.util.Map<String, Boolean> body, @CurrentUserId Long userId) {
-        sharingService.setFavorite(id, userId, body.getOrDefault("isFavorite", true));
+    public ResponseEntity<Void> setFavorite(@PathVariable Long id, @RequestBody FavoriteRequest body, @CurrentUserId Long userId) {
+        Boolean favorite = body.getIsFavorite() != null ? body.getIsFavorite() : true;
+        sharingService.setFavorite(id, userId, favorite);
         return ResponseEntity.ok().build();
     }
     public SharingController(final SharingService sharingService) {
