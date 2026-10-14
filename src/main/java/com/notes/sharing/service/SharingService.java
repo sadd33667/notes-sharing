@@ -53,6 +53,7 @@ public class SharingService {
         sharingRepository.findByNote_NoteID(noteId).stream().filter(s -> s.getUser().getUserID().equals(targetUserId)).findFirst().ifPresent(sharingRepository::delete);
     }
 
+    @Transactional(readOnly = true)
     public List<NoteResponse> sharedWithMe(Long userId) {
         return sharingRepository.findByUser_UserID(userId).stream().map(s -> noteMapper.toResponse(s.getNote())).toList();
     }

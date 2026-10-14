@@ -1,6 +1,5 @@
 package com.notes.sharing.security;
 
-import com.notes.sharing.exception.NotFoundException;
 import com.notes.sharing.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

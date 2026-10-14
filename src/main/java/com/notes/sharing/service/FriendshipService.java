@@ -40,6 +40,7 @@ public class FriendshipService {
         return userMapper.toFriendship(saved, senderId);
     }
 
+    @Transactional(readOnly = true)
     public List<FriendshipResponse> myFriends(Long userId) {
         List<FriendshipResponse> out = new ArrayList<>();
         for (Friendship f : friendshipRepository.findForUser(userId)) {
@@ -50,6 +51,7 @@ public class FriendshipService {
         return out;
     }
 
+    @Transactional(readOnly = true)
     public List<FriendshipResponse> pendingReceived(Long userId) {
         List<FriendshipResponse> out = new ArrayList<>();
         for (Friendship f : friendshipRepository.findForUser(userId)) {

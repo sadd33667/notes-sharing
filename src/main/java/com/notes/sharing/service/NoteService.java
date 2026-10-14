@@ -78,6 +78,7 @@ public class NoteService {
         return noteRepository.findMineFiltered(ownerId, null).stream().map(noteMapper::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<NoteResponse> myNotesByType(Long ownerId, String type) {
         return noteRepository.findMineFiltered(ownerId, type).stream().map(noteMapper::toResponse).toList();
     }

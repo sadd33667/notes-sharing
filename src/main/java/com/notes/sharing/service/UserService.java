@@ -27,6 +27,7 @@ public class UserService {
     private final NotificationRepository notificationRepository;
     private final UserMapper userMapper;
 
+    @Transactional(readOnly = true)
     public ProfileResponse getProfile(Long userId) {
         return userMapper.toProfile(getUser(userId));
     }
@@ -41,6 +42,7 @@ public class UserService {
         return userMapper.toProfile(userRepository.save(user));
     }
 
+    @Transactional(readOnly = true)
     public SettingsResponse getSettings(Long userId) {
         UserSettings s = settingsRepository.findById(userId).orElseGet(() -> UserSettings.builder().user(getUser(userId)).build());
         return userMapper.toSettings(s);
