@@ -19,6 +19,7 @@ public class NoteMapper {
                 .color(n.getColor())
                 .isPinned(n.getIsPinned())
                 .createdAt(n.getCreatedAt())
+                .updatedAt(n.getUpdatedAt())
                 .visibility(n.getVisibility())
                 .build();
     }

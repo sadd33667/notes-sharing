@@ -43,6 +43,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(400).body(Map.of("code", 4000, "error", "Bad date, use like 2026-01-01T00:00:00"));
     }
 
+    // 400 - missing or bad fields. First problem only, kept short for the user.
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> badInput(org.springframework.web.bind.MethodArgumentNotValidException e) {
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(f -> f.getField() + " " + f.getDefaultMessage())
+                .orElse("Invalid input");
+        return ResponseEntity.status(400).body(Map.of("code", 4000, "error", message));
+    }
+
     // 409 - any database clash (duplicate etc.)
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> clash(org.springframework.dao.DataIntegrityViolationException e) {

@@ -18,7 +18,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(req));
+        AuthResponse res = authService.register(req);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("Location", "/api/users/" + res.getUserId())
+                .body(res);
     }
 
     @PostMapping("/login")

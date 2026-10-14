@@ -17,7 +17,10 @@ public class FriendshipController {
 
     @PostMapping("/request")
     public ResponseEntity<FriendshipResponse> sendRequest(@Valid @RequestBody FriendRequest body, @CurrentUserId Long userId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(friendshipService.sendRequest(userId, body.getUsername()));
+        FriendshipResponse res = friendshipService.sendRequest(userId, body.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("Location", "/api/friends/" + res.getRelationshipID())
+                .body(res);
     }
 
     @GetMapping

@@ -20,25 +20,25 @@ public class NoteController {
 
     @PostMapping
     public ResponseEntity<NoteResponse> create(@Valid @RequestBody CreateNoteRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(noteService.createNote(req));
+        NoteResponse res = noteService.createNote(req);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("Location", "/api/notes/" + res.getNoteID())
+                .body(res);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<NoteResponse> getOne(@PathVariable Long id, @CurrentUserId Long userId) {
-        Long requesterId = userId;
-        return ResponseEntity.ok(noteService.getNote(id, requesterId));
+        return ResponseEntity.ok(noteService.getNote(id, userId));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<NoteResponse> update(@PathVariable Long id, @RequestBody UpdateNoteRequest body, @CurrentUserId Long userId) {
-        Long requesterId = userId;
-        return ResponseEntity.ok(noteService.updateNote(id, requesterId, body.getTitle(), body.getContents()));
+        return ResponseEntity.ok(noteService.updateNote(id, userId, body.getTitle(), body.getContents()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id, @CurrentUserId Long userId) {
-        Long requesterId = userId;
-        noteService.deleteNote(id, requesterId);
+        noteService.deleteNote(id, userId);
         return ResponseEntity.noContent().build();
     }
 
