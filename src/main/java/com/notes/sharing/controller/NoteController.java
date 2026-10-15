@@ -22,8 +22,8 @@ public class NoteController {
     private final NoteService noteService;
 
     @PostMapping
-    public ResponseEntity<NoteResponse> create(@Valid @RequestBody CreateNoteRequest req) {
-        NoteResponse res = noteService.createNote(req);
+    public ResponseEntity<NoteResponse> create(@Valid @RequestBody CreateNoteRequest req, @CurrentUserId Long userId) {
+        NoteResponse res = noteService.createNote(req, userId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Location", "/api/notes/" + res.getNoteID())
                 .body(res);

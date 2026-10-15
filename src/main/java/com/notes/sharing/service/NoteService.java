@@ -29,9 +29,9 @@ public class NoteService {
     private final NoteMapper noteMapper;
 
     @Transactional
-    public NoteResponse createNote(CreateNoteRequest req) {
-        User owner = userRepository.findById(req.getOwnerId())
-                .orElseThrow(() -> new SystemException(ErrorCode.USER_NOT_FOUND, "User not found: " + req.getOwnerId()));
+    public NoteResponse createNote(CreateNoteRequest req, Long ownerId) {
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new SystemException(ErrorCode.USER_NOT_FOUND, "User not found: " + ownerId));
 
         Note note = Note.builder()
                 .owner(owner)

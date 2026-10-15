@@ -30,12 +30,11 @@ class CreateNoteTest {
                 .build());
 
         CreateNoteRequest req = CreateNoteRequest.builder()
-                .ownerId(user.getUserID())
                 .title("First note")
                 .contents("Hello world")
                 .build();
 
-        NoteResponse res = noteService.createNote(req);
+        NoteResponse res = noteService.createNote(req, user.getUserID());
 
         assertNotNull(res.getNoteID());
         assertEquals("First note", res.getTitle());
@@ -52,9 +51,9 @@ class CreateNoteTest {
                 .build());
 
         NoteResponse first = noteService.createNote(CreateNoteRequest.builder()
-                .ownerId(user.getUserID()).title("One").contents("1").build());
+                .title("One").contents("1").build(), user.getUserID());
         NoteResponse second = noteService.createNote(CreateNoteRequest.builder()
-                .ownerId(user.getUserID()).title("Two").contents("2").build());
+                .title("Two").contents("2").build(), user.getUserID());
 
         assertEquals(1, first.getUserNoteNumber());
         assertEquals(2, second.getUserNoteNumber());

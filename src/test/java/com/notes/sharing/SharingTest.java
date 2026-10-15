@@ -32,7 +32,7 @@ class SharingTest {
                 .username("friend").email("f" + System.nanoTime() + "@t.com").passwordHash("h").build());
 
         NoteResponse note = noteService.createNote(CreateNoteRequest.builder()
-                .ownerId(owner.getUserID()).title("Shared").contents("hi").build());
+                .title("Shared").contents("hi").build(), owner.getUserID());
 
         // friend cannot read before share
         assertThrows(Exception.class, () -> noteService.getNote(note.getNoteID(), friend.getUserID()));

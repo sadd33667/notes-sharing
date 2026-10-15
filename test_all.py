@@ -33,7 +33,7 @@ tok2 = u2["token"]
 r, me = call("GET", "/api/users/me", token=tok1)
 check("profile", r == 200 and me["username"].startswith("u1"), str(r))
 
-r, note = call("POST", "/api/notes", token=tok1, body={"ownerId": owner["userId"], "title": "N1", "contents": "hi"})
+r, note = call("POST", "/api/notes", token=tok1, body={"title": "N1", "contents": "hi"})
 check("create-note", r == 201 and note["noteID"], str(r))
 nid = note["noteID"]
 
