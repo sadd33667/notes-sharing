@@ -5,8 +5,8 @@ import com.notes.sharing.dto.LoginRequest;
 import com.notes.sharing.dto.RegisterRequest;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.entity.UserSettings;
-import com.notes.sharing.exception.ConflictException;
-import com.notes.sharing.exception.NotFoundException;
+import com.notes.sharing.exception.ErrorCode;
+import com.notes.sharing.exception.SystemException;
 import com.notes.sharing.repository.UserRepository;
 import com.notes.sharing.repository.UserSettingsRepository;
 import com.notes.sharing.security.JwtService;
@@ -34,10 +34,10 @@ public class AuthService {
         String username = req.getUsername().trim();
         String email = req.getEmail().trim().toLowerCase();
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new ConflictException(3001, "Email already registered");
+            throw new SystemException(ErrorCode.EMAIL_TAKEN, "Email already registered");
         }
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new ConflictException(3002, "Username already taken");
+            throw new SystemException(ErrorCode.USERNAME_TAKEN, "Username already taken");
         }
 
         User user = User.builder()
@@ -59,22 +59,22 @@ public class AuthService {
             auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     req.getEmail().trim().toLowerCase(), req.getPassword()));
         } catch (Exception e) {
-            throw new NotFoundException(1005, "Invalid email or password");
+            throw new SystemException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password");
         }
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         String token = jwtService.generateToken(principal.getUserId(), principal.getEmail());
         User user = userRepository.findById(principal.getUserId())
-                .orElseThrow(() -> new NotFoundException(1001, "Invalid email or password"));
+                .orElseThrow(() -> new SystemException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password"));
         return new AuthResponse(token, user.getUserID(), user.getUsername());
     }
 
     @Transactional
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(1001, "User not found"));
+                .orElseThrow(() -> new SystemException(ErrorCode.USER_NOT_FOUND, "User not found"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
-            throw new ConflictException(3008, "Old password is wrong");
+            throw new SystemException(ErrorCode.WRONG_PASSWORD, "Old password is wrong");
         }
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);

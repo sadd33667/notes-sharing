@@ -2,7 +2,8 @@ package com.notes.sharing.service;
 
 import com.notes.sharing.dto.NotificationResponse;
 import com.notes.sharing.entity.Notification;
-import com.notes.sharing.exception.ForbiddenException;
+import com.notes.sharing.exception.ErrorCode;
+import com.notes.sharing.exception.SystemException;
 import com.notes.sharing.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,9 +34,9 @@ public class NotificationService {
     @Transactional
     public void markRead(Long notificationId, Long userId) {
         Notification n = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new com.notes.sharing.exception.NotFoundException(1004, "Notification not found"));
+                .orElseThrow(() -> new com.notes.sharing.exception.SystemException(com.notes.sharing.exception.ErrorCode.NOTIFICATION_NOT_FOUND, "Notification not found"));
         if (!n.getNotified().getUserID().equals(userId)) {
-            throw new ForbiddenException(2007, "This notification is not yours");
+            throw new SystemException(ErrorCode.NOTIFICATION_DENIED, "This notification is not yours");
         }
         n.setIsRead(true);
         notificationRepository.save(n);

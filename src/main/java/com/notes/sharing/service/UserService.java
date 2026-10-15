@@ -7,7 +7,8 @@ import com.notes.sharing.dto.UpdateSettingsRequest;
 import com.notes.sharing.entity.User;
 import com.notes.sharing.entity.UserSettings;
 import com.notes.sharing.mapper.UserMapper;
-import com.notes.sharing.exception.NotFoundException;
+import com.notes.sharing.exception.ErrorCode;
+import com.notes.sharing.exception.SystemException;
 import com.notes.sharing.repository.FriendshipRepository;
 import com.notes.sharing.repository.NoteRepository;
 import com.notes.sharing.repository.NoteSharingRepository;
@@ -66,7 +67,7 @@ public class UserService {
 
     private User getUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(1001, "User not found"));
+                .orElseThrow(() -> new SystemException(ErrorCode.USER_NOT_FOUND, "User not found"));
     }
 
     @Transactional
