@@ -14,11 +14,14 @@ import com.notes.sharing.repository.NoteSharingRepository;
 import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import com.notes.sharing.repository.UserSettingsRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
+
     private final UserRepository userRepository;
     private final UserSettingsRepository settingsRepository;
     private final NoteRepository noteRepository;
@@ -44,39 +47,37 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public SettingsResponse getSettings(Long userId) {
-        UserSettings s = settingsRepository.findById(userId).orElseGet(() -> UserSettings.builder().user(getUser(userId)).build());
+        UserSettings s = settingsRepository.findById(userId).orElseGet(() ->
+                UserSettings.builder().user(getUser(userId)).build());
         return userMapper.toSettings(s);
     }
 
     @Transactional
     public SettingsResponse updateSettings(Long userId, UpdateSettingsRequest body) {
-        UserSettings s = settingsRepository.findById(userId).orElseGet(() -> UserSettings.builder().user(getUser(userId)).build());
+        UserSettings s = settingsRepository.findById(userId).orElseGet(() ->
+                UserSettings.builder().user(getUser(userId)).build());
         if (body.getTheme() != null) s.setTheme(body.getTheme());
         if (body.getLanguage() != null) s.setLanguage(body.getLanguage());
         if (body.getTwoFactorEnabled() != null) s.setTwoFactorEnabled(body.getTwoFactorEnabled());
-        if (body.getNotificationsEnabled() != null) s.setNotificationsEnabled(body.getNotificationsEnabled());
+        if (body.getNotificationsEnabled() != null)
+            s.setNotificationsEnabled(body.getNotificationsEnabled());
         return userMapper.toSettings(settingsRepository.save(s));
     }
 
     private User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException(1001, "User not found"));
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(1001, "User not found"));
     }
 
     @Transactional
     public void deleteAccount(Long userId) {
         notificationRepository.deleteByUser(userId);
-        noteRepository.findByOwner_UserID(userId).forEach(n -> notificationRepository.deleteByNote(n.getNoteID()));
+        noteRepository.findByOwner_UserID(userId)
+                .forEach(n -> notificationRepository.deleteByNote(n.getNoteID()));
         sharingRepository.deleteByUser(userId);
         friendshipRepository.deleteByUser(userId);
         userRepository.delete(getUser(userId));
     }
-    public UserService(final UserRepository userRepository, final UserSettingsRepository settingsRepository, final NoteRepository noteRepository, final NoteSharingRepository sharingRepository, final FriendshipRepository friendshipRepository, final NotificationRepository notificationRepository, final UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.settingsRepository = settingsRepository;
-        this.noteRepository = noteRepository;
-        this.sharingRepository = sharingRepository;
-        this.friendshipRepository = friendshipRepository;
-        this.notificationRepository = notificationRepository;
-        this.userMapper = userMapper;
-    }
+
+
 }

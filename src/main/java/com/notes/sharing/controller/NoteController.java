@@ -6,6 +6,7 @@ import com.notes.sharing.dto.PinRequest;
 import com.notes.sharing.dto.UpdateNoteRequest;
 import com.notes.sharing.service.NoteService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.notes.sharing.security.CurrentUserId;
@@ -15,7 +16,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/notes")
+@RequiredArgsConstructor
 public class NoteController {
+
     private final NoteService noteService;
 
     @PostMapping
@@ -27,23 +30,35 @@ public class NoteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<NoteResponse> getOne(@PathVariable Long id, @CurrentUserId Long userId) {
-        return ResponseEntity.ok(noteService.getNote(id, userId));
+    public ResponseEntity<NoteResponse> getOne(
+            @PathVariable Long id,
+            @CurrentUserId Long userId) {
+        Long requesterId = userId;
+        return ResponseEntity.ok(noteService.getNote(id, requesterId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<NoteResponse> update(@PathVariable Long id, @RequestBody UpdateNoteRequest body, @CurrentUserId Long userId) {
-        return ResponseEntity.ok(noteService.updateNote(id, userId, body.getTitle(), body.getContents()));
+    public ResponseEntity<NoteResponse> update(
+            @PathVariable Long id,
+            @RequestBody UpdateNoteRequest body,
+            @CurrentUserId Long userId) {
+        Long requesterId = userId;
+        return ResponseEntity.ok(noteService.updateNote(id, requesterId, body.getTitle(), body.getContents()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, @CurrentUserId Long userId) {
-        noteService.deleteNote(id, userId);
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            @CurrentUserId Long userId) {
+        Long requesterId = userId;
+        noteService.deleteNote(id, requesterId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<NoteResponse>> myNotes(@RequestParam(required = false) String type, @CurrentUserId Long userId) {
+    public ResponseEntity<List<NoteResponse>> myNotes(
+            @RequestParam(required = false) String type,
+            @CurrentUserId Long userId) {
         if (type != null) {
             return ResponseEntity.ok(noteService.myNotesByType(userId, type));
         }
@@ -51,21 +66,29 @@ public class NoteController {
     }
 
     @GetMapping("/number/{n}")
-    public ResponseEntity<NoteResponse> getByNumber(@PathVariable int n, @CurrentUserId Long userId) {
+    public ResponseEntity<NoteResponse> getByNumber(
+            @PathVariable int n,
+            @CurrentUserId Long userId) {
         return ResponseEntity.ok(noteService.getMyNoteByNumber(userId, n));
     }
 
     @GetMapping("/upcoming")
-    public ResponseEntity<List<NoteResponse>> upcoming(@RequestParam String from, @RequestParam String to, @CurrentUserId Long userId) {
-        return ResponseEntity.ok(noteService.upcoming(userId, LocalDateTime.parse(from), LocalDateTime.parse(to)));
+    public ResponseEntity<List<NoteResponse>> upcoming(
+            @RequestParam String from,
+            @RequestParam String to,
+            @CurrentUserId Long userId) {
+        return ResponseEntity.ok(noteService.upcoming(
+                userId,
+                LocalDateTime.parse(from),
+                LocalDateTime.parse(to)));
     }
 
     @PutMapping("/{id}/pin")
-    public ResponseEntity<NoteResponse> setPinned(@PathVariable Long id, @RequestBody PinRequest body, @CurrentUserId Long userId) {
+    public ResponseEntity<NoteResponse> setPinned(
+            @PathVariable Long id,
+            @RequestBody PinRequest body,
+            @CurrentUserId Long userId) {
         Boolean pinned = body.getIsPinned() != null ? body.getIsPinned() : true;
         return ResponseEntity.ok(noteService.setPinned(id, userId, pinned));
-    }
-    public NoteController(final NoteService noteService) {
-        this.noteService = noteService;
     }
 }

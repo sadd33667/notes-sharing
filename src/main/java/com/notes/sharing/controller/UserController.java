@@ -5,13 +5,16 @@ import com.notes.sharing.dto.SettingsResponse;
 import com.notes.sharing.dto.UpdateProfileRequest;
 import com.notes.sharing.dto.UpdateSettingsRequest;
 import com.notes.sharing.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import com.notes.sharing.security.CurrentUserId;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users/me")
+@RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     @GetMapping
@@ -20,7 +23,8 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<ProfileResponse> updateProfile(@RequestBody UpdateProfileRequest body, @CurrentUserId Long userId) {
+    public ResponseEntity<ProfileResponse> updateProfile(
+            @RequestBody UpdateProfileRequest body, @CurrentUserId Long userId) {
         return ResponseEntity.ok(userService.updateProfile(userId, body));
     }
 
@@ -30,7 +34,8 @@ public class UserController {
     }
 
     @PutMapping("/settings")
-    public ResponseEntity<SettingsResponse> updateSettings(@RequestBody UpdateSettingsRequest body, @CurrentUserId Long userId) {
+    public ResponseEntity<SettingsResponse> updateSettings(
+            @RequestBody UpdateSettingsRequest body, @CurrentUserId Long userId) {
         return ResponseEntity.ok(userService.updateSettings(userId, body));
     }
 
@@ -38,8 +43,5 @@ public class UserController {
     public ResponseEntity<Void> deleteAccount(@CurrentUserId Long userId) {
         userService.deleteAccount(userId);
         return ResponseEntity.noContent().build();
-    }
-    public UserController(final UserService userService) {
-        this.userService = userService;
     }
 }

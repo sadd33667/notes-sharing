@@ -11,6 +11,7 @@ import com.notes.sharing.repository.UserRepository;
 import com.notes.sharing.repository.UserSettingsRepository;
 import com.notes.sharing.security.JwtService;
 import com.notes.sharing.security.UserPrincipal;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
+
     private final UserRepository userRepository;
     private final UserSettingsRepository settingsRepository;
     private final PasswordEncoder passwordEncoder;
@@ -36,7 +39,13 @@ public class AuthService {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new ConflictException(3002, "Username already taken");
         }
-        User user = User.builder().username(username).email(email).passwordHash(passwordEncoder.encode(req.getPassword())).build();
+
+        User user = User.builder()
+                .username(username)
+                .email(email)
+                .passwordHash(passwordEncoder.encode(req.getPassword()))
+                .build();
+
         User saved = userRepository.save(user);
         settingsRepository.save(UserSettings.builder().user(saved).build());
         String token = jwtService.generateToken(saved.getUserID(), saved.getEmail());
@@ -47,30 +56,27 @@ public class AuthService {
         // Spring itself checks email + BCrypt password, I only ask it.
         Authentication auth;
         try {
-            auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getEmail().trim().toLowerCase(), req.getPassword()));
+            auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    req.getEmail().trim().toLowerCase(), req.getPassword()));
         } catch (Exception e) {
             throw new NotFoundException(1005, "Invalid email or password");
         }
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         String token = jwtService.generateToken(principal.getUserId(), principal.getEmail());
-        User user = userRepository.findById(principal.getUserId()).orElseThrow(() -> new NotFoundException(1001, "Invalid email or password"));
+        User user = userRepository.findById(principal.getUserId())
+                .orElseThrow(() -> new NotFoundException(1001, "Invalid email or password"));
         return new AuthResponse(token, user.getUserID(), user.getUsername());
     }
 
     @Transactional
     public void changePassword(Long userId, String oldPassword, String newPassword) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(1001, "User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(1001, "User not found"));
+
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             throw new ConflictException(3008, "Old password is wrong");
         }
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-    }
-    public AuthService(final UserRepository userRepository, final UserSettingsRepository settingsRepository, final PasswordEncoder passwordEncoder, final JwtService jwtService, final AuthenticationManager authenticationManager) {
-        this.userRepository = userRepository;
-        this.settingsRepository = settingsRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
     }
 }

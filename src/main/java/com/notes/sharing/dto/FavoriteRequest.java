@@ -1,16 +1,12 @@
 package com.notes.sharing.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class FavoriteRequest {
     private Boolean isFavorite;
-
-    public FavoriteRequest() {
-    }
-
-    public Boolean getIsFavorite() {
-        return isFavorite;
-    }
-
-    public void setIsFavorite(Boolean isFavorite) {
-        this.isFavorite = isFavorite;
-    }
 }
