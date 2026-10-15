@@ -12,6 +12,8 @@ import com.notes.sharing.repository.UserSettingsRepository;
 import com.notes.sharing.security.JwtService;
 import com.notes.sharing.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +30,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
@@ -48,6 +51,7 @@ public class AuthService {
 
         User saved = userRepository.save(user);
         settingsRepository.save(UserSettings.builder().user(saved).build());
+        log.info("registered userId={}", saved.getUserID());
         String token = jwtService.generateToken(saved.getUserID(), saved.getEmail());
         return new AuthResponse(token, saved.getUserID(), saved.getUsername());
     }
@@ -62,6 +66,7 @@ public class AuthService {
             throw new SystemException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password");
         }
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        log.info("login userId={}", principal.getUserId());
         String token = jwtService.generateToken(principal.getUserId(), principal.getEmail());
         User user = userRepository.findById(principal.getUserId())
                 .orElseThrow(() -> new SystemException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password"));
