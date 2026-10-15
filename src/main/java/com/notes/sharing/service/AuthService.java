@@ -62,7 +62,7 @@ public class AuthService {
         try {
             auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     req.getEmail().trim().toLowerCase(), req.getPassword()));
-        } catch (Exception e) {
+        } catch (org.springframework.security.core.AuthenticationException e) {
             throw new SystemException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password");
         }
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
