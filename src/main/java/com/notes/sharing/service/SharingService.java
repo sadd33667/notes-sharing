@@ -13,6 +13,8 @@ import com.notes.sharing.repository.NoteSharingRepository;
 import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class SharingService {
     private final NoteSharingRepository sharingRepository;
     private final NotificationRepository notificationRepository;
     private final NoteMapper noteMapper;
+    private final Logger log = LoggerFactory.getLogger(SharingService.class);
 
     @Transactional
     public void share(Long noteId, Long ownerId, Long targetUserId, String permission) {
@@ -59,6 +62,7 @@ public class SharingService {
                 .type("share")
                 .note(note)
                 .build());
+        log.info("Note {} shared by user {} with user {} (permission={})", noteId, ownerId, targetUserId, sharing.getPermission());
     }
 
     @Transactional
@@ -73,6 +77,7 @@ public class SharingService {
                 .filter(s -> s.getUser().getUserID().equals(targetUserId))
                 .findFirst()
                 .ifPresent(sharingRepository::delete);
+        log.info("Note {} unshared by user {} with user {}", noteId, ownerId, targetUserId);
     }
 
     @Transactional(readOnly = true)
@@ -90,5 +95,6 @@ public class SharingService {
                 .orElseThrow(() -> new SystemException(ErrorCode.NOTE_NOT_FOUND, "Note not found: " + noteId));
         sharing.setIsFavorite(favorite);
         sharingRepository.save(sharing);
+        log.info("Note {} favorite={} by user {}", noteId, favorite, userId);
     }
 }

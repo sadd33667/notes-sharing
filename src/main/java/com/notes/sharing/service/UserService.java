@@ -16,6 +16,8 @@ import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import com.notes.sharing.repository.UserSettingsRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ public class UserService {
     private final FriendshipRepository friendshipRepository;
     private final NotificationRepository notificationRepository;
     private final UserMapper userMapper;
+    private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     @Transactional(readOnly = true)
     public ProfileResponse getProfile(Long userId) {
@@ -43,7 +46,9 @@ public class UserService {
         if (body.getPhoneNumber() != null) user.setPhoneNumber(body.getPhoneNumber());
         if (body.getImage() != null) user.setImage(body.getImage());
         if (body.getSecondaryEmail() != null) user.setSecondaryEmail(body.getSecondaryEmail());
-        return userMapper.toProfile(userRepository.save(user));
+        User saved = userRepository.save(user);
+        log.info("User {} updated profile", userId);
+        return userMapper.toProfile(saved);
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +67,9 @@ public class UserService {
         if (body.getTwoFactorEnabled() != null) s.setTwoFactorEnabled(body.getTwoFactorEnabled());
         if (body.getNotificationsEnabled() != null)
             s.setNotificationsEnabled(body.getNotificationsEnabled());
-        return userMapper.toSettings(settingsRepository.save(s));
+        UserSettings saved = settingsRepository.save(s);
+        log.info("User {} updated settings", userId);
+        return userMapper.toSettings(saved);
     }
 
     private User getUser(Long userId) {
@@ -78,6 +85,7 @@ public class UserService {
         sharingRepository.deleteByUser(userId);
         friendshipRepository.deleteByUser(userId);
         userRepository.delete(getUser(userId));
+        log.info("User {} deleted account", userId);
     }
 
 

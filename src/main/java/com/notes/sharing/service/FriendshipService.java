@@ -11,6 +11,8 @@ import com.notes.sharing.repository.FriendshipRepository;
 import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ public class FriendshipService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final UserMapper userMapper;
+    private final Logger log = LoggerFactory.getLogger(FriendshipService.class);
 
     @Transactional
     public FriendshipResponse sendRequest(Long senderId, String targetUsername) {
@@ -56,6 +59,7 @@ public class FriendshipService {
                 .type("friend_request")
                 .friendship(saved)
                 .build());
+        log.info("User {} sent friend request to user {}", senderId, target.getUserID());
         return userMapper.toFriendship(saved, senderId);
     }
 
@@ -102,6 +106,7 @@ public class FriendshipService {
                     .friendship(f)
                     .build());
         }
+        log.info("User {} {} friendship request from user {}", userId, accept ? "accepted" : "rejected", f.getFUser().getUserID());
     }
 
     @Transactional
@@ -114,6 +119,7 @@ public class FriendshipService {
         }
         notificationRepository.deleteByFriendship(relationshipId);
         friendshipRepository.delete(f);
+        log.info("User {} removed friendship {}", userId, relationshipId);
     }
 
 }

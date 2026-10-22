@@ -37,9 +37,11 @@ public class AuthService {
         String username = req.getUsername().trim();
         String email = req.getEmail().trim().toLowerCase();
         if (userRepository.findByEmail(email).isPresent()) {
+            log.warn("Registration rejected: email already exists");
             throw new SystemException(ErrorCode.EMAIL_TAKEN, "Email already registered");
         }
         if (userRepository.findByUsername(username).isPresent()) {
+            log.warn("Registration rejected: username already taken");
             throw new SystemException(ErrorCode.USERNAME_TAKEN, "Username already taken");
         }
 
@@ -63,6 +65,7 @@ public class AuthService {
             auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     req.getEmail().trim().toLowerCase(), req.getPassword()));
         } catch (org.springframework.security.core.AuthenticationException e) {
+            log.warn("Login failed for email={}", req.getEmail());
             throw new SystemException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password");
         }
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();

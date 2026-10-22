@@ -6,6 +6,8 @@ import com.notes.sharing.exception.ErrorCode;
 import com.notes.sharing.exception.SystemException;
 import com.notes.sharing.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
     @Transactional(readOnly = true)
     public List<NotificationResponse> myNotifications(Long userId) {
@@ -40,5 +43,6 @@ public class NotificationService {
         }
         n.setIsRead(true);
         notificationRepository.save(n);
+        log.info("User {} marked notification {} as read", userId, notificationId);
     }
 }

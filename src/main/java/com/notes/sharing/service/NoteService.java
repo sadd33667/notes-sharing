@@ -12,6 +12,8 @@ import com.notes.sharing.repository.NoteSharingRepository;
 import com.notes.sharing.repository.NotificationRepository;
 import com.notes.sharing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class NoteService {
     private final NoteSharingRepository sharingRepository;
     private final NotificationRepository notificationRepository;
     private final NoteMapper noteMapper;
+    private final Logger log = LoggerFactory.getLogger(NoteService.class);
 
     @Transactional
     public NoteResponse createNote(CreateNoteRequest req, Long ownerId) {
@@ -51,6 +54,7 @@ public class NoteService {
         note.setVisibility(note.getVisibility().toLowerCase());
 
         Note saved = noteRepository.save(note);
+        log.info("Note {} created by user {}", saved.getNoteID(), ownerId);
         return noteMapper.toResponse(saved);
     }
 
@@ -84,7 +88,9 @@ public class NoteService {
         }
         if (title != null && !title.isBlank()) note.setTitle(title);
         if (contents != null) note.setContents(contents);
-        return noteMapper.toResponse(noteRepository.save(note));
+        Note saved = noteRepository.save(note);
+        log.info("Note {} updated by user {}", noteId, requesterId);
+        return noteMapper.toResponse(saved);
     }
 
     @Transactional
@@ -98,6 +104,7 @@ public class NoteService {
         notificationRepository.deleteByNote(noteId);
         sharingRepository.deleteByNote(noteId);
         noteRepository.delete(note);
+        log.info("Note {} deleted by user {}", noteId, requesterId);
     }
 
     @Transactional(readOnly = true)
@@ -140,7 +147,9 @@ public class NoteService {
             throw new SystemException(ErrorCode.NOTE_PIN_DENIED, "Only the owner can pin this note");
         }
         note.setIsPinned(pinned);
-        return noteMapper.toResponse(noteRepository.save(note));
+        Note saved = noteRepository.save(note);
+        log.info("Note {} pinned={} by user {}", noteId, pinned, requesterId);
+        return noteMapper.toResponse(saved);
     }
 
 }
