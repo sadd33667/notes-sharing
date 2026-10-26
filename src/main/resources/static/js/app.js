@@ -153,7 +153,8 @@ async function refreshNotes() {
         <div class="actions">
           <button class="btn" onclick="viewNote(${n.noteID})">View</button>
           <button class="btn" onclick="editNote(${n.noteID})">Edit</button>
-          <button class="btn" onclick="togglePin(${n.noteID}, ${!n.pinned})">${n.pinned ? "Unpin" : "Pin"}</button>
+          <button class="btn" onclick="togglePin(${n.noteID}, ${!n.isPinned})">${n.isPinned ? "Unpin" : "Pin"}</button>
+          <button class="btn" onclick="shareNotePrompt(${n.noteID})">Share</button>
           <button class="btn danger" onclick="removeNote(${n.noteID})">Delete</button>
         </div>
       </div>
@@ -202,6 +203,17 @@ async function togglePin(id, pinned) {
   } catch (e) { toast(e.message, "error"); }
 }
 
+async function shareNotePrompt(id) {
+  const userId = prompt("Share with user ID:");
+  if (!userId) return;
+  const perm = prompt("Permission (view/edit):", "view");
+  if (!perm) return;
+  try {
+    await api.shareNote(id, { userId: Number(userId), permission: perm });
+    toast("Shared!", "ok");
+  } catch (e) { toast(e.message, "error"); }
+}
+
 async function removeNote(id) {
   if (!confirm("Delete this note?")) return;
   try {
@@ -223,7 +235,7 @@ async function refreshShared() {
       <div class="item">
         <h4>${escapeHtml(n.title)} ${n.isPinned ? "📌" : ""}</h4>
         <p>${escapeHtml(n.contents || "")}</p>
-        <div class="meta">Owner: ${escapeHtml((n.owner && (n.owner.fullName || n.owner.username || n.owner.email)) || "-")} · Visibility: ${n.visibility || "-"}</div>
+        <div class="meta">Visibility: ${n.visibility || "-"} · #${n.userNoteNumber ?? n.noteID}</div>
         <div class="actions">
           <button class="btn" onclick="viewNote(${n.noteID})">View</button>
           <button class="btn" onclick="toggleFavorite(${n.noteID}, true)">Favorite</button>
