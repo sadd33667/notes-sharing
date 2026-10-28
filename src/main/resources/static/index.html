@@ -12,9 +12,10 @@
     <nav id="nav" class="nav hidden">
       <button data-view="dashboard" class="nav-btn active">Dashboard</button>
       <button data-view="notes" class="nav-btn">My Notes</button>
+      <button data-view="upcoming" class="nav-btn">Upcoming</button>
       <button data-view="shared" class="nav-btn">Shared with me</button>
       <button data-view="friends" class="nav-btn">Friends</button>
-      <button data-view="notifications" class="nav-btn">Notifications</button>
+      <button data-view="notifications" class="nav-btn">Notifications <span id="notifBadge" class="badge hidden">0</span></button>
       <button data-view="profile" class="nav-btn">Profile</button>
       <button id="logoutBtn" class="nav-btn logout">Logout</button>
     </nav>
@@ -94,6 +95,25 @@
         </div>
       </div>
       <div id="notesList" class="list"></div>
+    </section>
+
+    <!-- UPCOMING VIEW -->
+    <section id="view-upcoming" class="view hidden">
+      <div class="row between">
+        <h2>Upcoming notes</h2>
+        <button id="refreshUpcoming" class="btn">Load</button>
+      </div>
+      <div class="card">
+        <div class="row">
+          <label style="flex:1">From
+            <input type="datetime-local" id="upFrom" />
+          </label>
+          <label style="flex:1">To
+            <input type="datetime-local" id="upTo" />
+          </label>
+        </div>
+      </div>
+      <div id="upcomingList" class="list"></div>
     </section>
 
     <!-- SHARED VIEW -->
@@ -190,6 +210,26 @@
       <div class="modal-card">
         <button id="modalClose" class="modal-close">&times;</button>
         <div id="modalBody"></div>
+      </div>
+    </div>
+
+    <div id="shareModal" class="modal hidden">
+      <div class="modal-card">
+        <button id="shareModalClose" class="modal-close">&times;</button>
+        <h3>Share note</h3>
+        <form id="shareForm">
+          <label>Friend
+            <select id="shareFriend"></select>
+          </label>
+          <label>Permission
+            <select id="sharePerm">
+              <option value="view">View</option>
+              <option value="edit">Edit</option>
+            </select>
+          </label>
+          <button type="submit" class="btn primary">Share</button>
+        </form>
+        <div id="shareMsg" class="msg"></div>
       </div>
     </div>
   </main>

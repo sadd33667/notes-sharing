@@ -32,6 +32,7 @@ public class UserMapper {
         User other = f.getFUser().getUserID().equals(viewerId) ? f.getSUser() : f.getFUser();
         return FriendshipResponse.builder()
                 .relationshipID(f.getRelationshipID())
+                .friendUserId(other.getUserID())
                 .friendUsername(other.getUsername())
                 .status(f.getStatus())
                 .build();

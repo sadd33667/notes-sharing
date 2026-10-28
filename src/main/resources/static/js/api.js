@@ -33,6 +33,7 @@ const api = {
   changePassword: (b) => request("/auth/password", { method: "PUT", body: JSON.stringify(b) }),
   // notes
   listNotes: (type) => request("/notes" + (type ? "?type=" + encodeURIComponent(type) : "")),
+  upcoming: (from, to) => request("/notes/upcoming?from=" + encodeURIComponent(from) + "&to=" + encodeURIComponent(to)),
   getNote: (id) => request("/notes/" + id),
   createNote: (b) => request("/notes", { method: "POST", body: JSON.stringify(b) }),
   updateNote: (id, b) => request("/notes/" + id, { method: "PUT", body: JSON.stringify(b) }),

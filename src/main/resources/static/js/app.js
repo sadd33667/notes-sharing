@@ -95,6 +95,15 @@ $$(".nav-btn[data-view]").forEach(btn => {
 async function loadView(v) {
   if (v === "dashboard") await refreshDashboard();
   else if (v === "notes") await refreshNotes();
+  else if (v === "upcoming") {
+    if (!$("#upFrom").value) {
+      const now = new Date();
+      $("#upFrom").value = toLocalInput(now);
+      const later = new Date(now.getTime() + 7*24*60*60*1000);
+      $("#upTo").value = toLocalInput(later);
+    }
+    await refreshUpcoming();
+  }
   else if (v === "shared") await refreshShared();
   else if (v === "friends") await refreshFriends();
   else if (v === "notifications") await refreshNotifs();
@@ -203,16 +212,41 @@ async function togglePin(id, pinned) {
   } catch (e) { toast(e.message, "error"); }
 }
 
+let shareNoteId = null;
 async function shareNotePrompt(id) {
-  const userId = prompt("Share with user ID:");
-  if (!userId) return;
-  const perm = prompt("Permission (view/edit):", "view");
-  if (!perm) return;
+  shareNoteId = id;
+  const sel = $("#shareFriend");
+  sel.innerHTML = "<option>Loading...</option>";
+  $("#shareModal").classList.remove("hidden");
   try {
-    await api.shareNote(id, { userId: Number(userId), permission: perm });
-    toast("Shared!", "ok");
-  } catch (e) { toast(e.message, "error"); }
+    const friends = await api.listFriends();
+    if (!friends || !friends.length) {
+      sel.innerHTML = "<option value=''>No friends yet</option>";
+      return;
+    }
+    sel.innerHTML = friends.map(f =>
+      `<option value='${f.friendUserId}'>${escapeHtml(f.friendUsername)}</option>`).join("");
+  } catch (e) {
+    sel.innerHTML = "<option value=''>Error loading friends</option>";
+    toast(e.message, "error");
+  }
 }
+
+$("#shareForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = $("#shareMsg");
+  const userId = Number($("#shareFriend").value);
+  if (!userId) { showMsg(msg, "Pick a friend", "error"); return; }
+  const perm = $("#sharePerm").value;
+  try {
+    await api.shareNote(shareNoteId, { userId, permission: perm });
+    showMsg(msg, "Shared!", "ok");
+    toast("Shared!", "ok");
+    $("#shareModal").classList.add("hidden");
+  } catch (err) { showMsg(msg, err.message, "error"); }
+});
+$("#shareModalClose").addEventListener("click", () => $("#shareModal").classList.add("hidden"));
+$("#shareModal").addEventListener("click", (e) => { if (e.target.id === "shareModal") $("#shareModal").classList.add("hidden"); });
 
 async function removeNote(id) {
   if (!confirm("Delete this note?")) return;
@@ -223,6 +257,33 @@ async function removeNote(id) {
     await refreshDashboard();
   } catch (e) { toast(e.message, "error"); }
 }
+
+// ---------- UPCOMING ----------
+async function refreshUpcoming() {
+  const list = $("#upcomingList");
+  list.innerHTML = "<p class='muted'>Loading...</p>";
+  const from = $("#upFrom").value;
+  const to = $("#upTo").value;
+  if (!from || !to) {
+    list.innerHTML = "<p class='muted'>Pick a date range above.</p>";
+    return;
+  }
+  try {
+    const notes = await api.upcoming(from, to);
+    if (!notes || !notes.length) { list.innerHTML = "<p class='muted'>No upcoming notes.</p>"; return; }
+    list.innerHTML = notes.map(n => `
+      <div class="item">
+        <h4>${escapeHtml(n.title)} ${n.isPinned ? "📌" : ""}</h4>
+        <p>${escapeHtml(n.contents || "")}</p>
+        <div class="meta">${fmtDate(n.createdAt)} → ${fmtDate(n.updatedAt)} · ${n.visibility || "-"}</div>
+        <div class="actions"><button class="btn" onclick="viewNote(${n.noteID})">View</button></div>
+      </div>
+    `).join("");
+  } catch (e) {
+    list.innerHTML = "<p class='msg error'>" + escapeHtml(e.message) + "</p>";
+  }
+}
+$("#refreshUpcoming").addEventListener("click", refreshUpcoming);
 
 // ---------- SHARED ----------
 async function refreshShared() {
@@ -324,6 +385,10 @@ async function refreshNotifs() {
   list.innerHTML = "<p class='muted'>Loading...</p>";
   try {
     const ns = await api.listNotifications();
+    const unread = (ns || []).filter(n => !n.isRead).length;
+    const badge = $("#notifBadge");
+    if (unread > 0) { badge.textContent = unread; badge.classList.remove("hidden"); }
+    else badge.classList.add("hidden");
     if (!ns || !ns.length) { list.innerHTML = "<p class='muted'>No notifications.</p>"; return; }
     list.innerHTML = ns.map(n => `
       <div class="item">
@@ -412,6 +477,10 @@ function escapeHtml(s) {
 function fmtDate(d) {
   if (!d) return "-";
   try { return new Date(d).toLocaleString(); } catch (e) { return d; }
+}
+function toLocalInput(d) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
 }
 
 // ---------- BOOT ----------
