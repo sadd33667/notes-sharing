@@ -2,6 +2,7 @@ package com.notes.sharing.service;
 
 import com.notes.sharing.dto.ProfileResponse;
 import com.notes.sharing.dto.SettingsResponse;
+import com.notes.sharing.dto.UserSummary;
 import com.notes.sharing.dto.UpdateProfileRequest;
 import com.notes.sharing.dto.UpdateSettingsRequest;
 import com.notes.sharing.entity.User;
@@ -75,6 +76,22 @@ public class UserService {
     private User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new SystemException(ErrorCode.USER_NOT_FOUND, "User not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<UserSummary> searchUsers(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        java.util.List<UserSummary> out = new java.util.ArrayList<>();
+        for (User u : userRepository.findByUsernameContainingIgnoreCase(query.trim())) {
+            out.add(UserSummary.builder()
+                    .userID(u.getUserID())
+                    .username(u.getUsername())
+                    .userTag(u.getUserTag())
+                    .build());
+        }
+        return out;
     }
 
     @Transactional

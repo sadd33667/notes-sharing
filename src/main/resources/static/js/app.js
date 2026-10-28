@@ -215,28 +215,39 @@ async function togglePin(id, pinned) {
 let shareNoteId = null;
 async function shareNotePrompt(id) {
   shareNoteId = id;
-  const sel = $("#shareFriend");
-  sel.innerHTML = "<option>Loading...</option>";
+  $("#shareUserId").value = "";
+  $("#shareSelected").textContent = "No user selected";
+  $("#shareResults").innerHTML = "";
+  $("#shareSearch").value = "";
+  $("#shareMsg").textContent = "";
   $("#shareModal").classList.remove("hidden");
+}
+
+$("#shareSearchBtn").addEventListener("click", async () => {
+  const q = $("#shareSearch").value.trim();
+  const res = $("#shareResults");
+  res.innerHTML = "<p class='muted'>Searching...</p>";
   try {
-    const friends = await api.listFriends();
-    if (!friends || !friends.length) {
-      sel.innerHTML = "<option value=''>No friends yet</option>";
-      return;
-    }
-    sel.innerHTML = friends.map(f =>
-      `<option value='${f.friendUserId}'>${escapeHtml(f.friendUsername)}</option>`).join("");
-  } catch (e) {
-    sel.innerHTML = "<option value=''>Error loading friends</option>";
-    toast(e.message, "error");
-  }
+    const users = await api.searchUsers(q || "a");
+    if (!users || !users.length) { res.innerHTML = "<p class='muted'>No users found.</p>"; return; }
+    res.innerHTML = users.map(u => `
+      <div class="item" style="cursor:pointer" onclick="selectShareUser(${u.userID}, '${escapeHtml(u.username)}')">
+        <strong>${escapeHtml(u.username)}</strong> ${u.userTag ? "#" + escapeHtml(u.userTag) : ""}
+      </div>
+    `).join("");
+  } catch (e) { res.innerHTML = "<p class='msg error'>" + escapeHtml(e.message) + "</p>"; }
+});
+
+function selectShareUser(id, name) {
+  $("#shareUserId").value = id;
+  $("#shareSelected").textContent = "Selected: " + name + " (id " + id + ")";
 }
 
 $("#shareForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msg = $("#shareMsg");
-  const userId = Number($("#shareFriend").value);
-  if (!userId) { showMsg(msg, "Pick a friend", "error"); return; }
+  const userId = Number($("#shareUserId").value);
+  if (!userId) { showMsg(msg, "Select a user first", "error"); return; }
   const perm = $("#sharePerm").value;
   try {
     await api.shareNote(shareNoteId, { userId, permission: perm });

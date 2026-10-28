@@ -217,10 +217,14 @@
       <div class="modal-card">
         <button id="shareModalClose" class="modal-close">&times;</button>
         <h3>Share note</h3>
+        <div class="row">
+          <input type="text" id="shareSearch" placeholder="Search username..." />
+          <button id="shareSearchBtn" class="btn">Search</button>
+        </div>
+        <div id="shareResults" class="list" style="max-height:160px;overflow:auto;margin:8px 0;"></div>
         <form id="shareForm">
-          <label>Friend
-            <select id="shareFriend"></select>
-          </label>
+          <input type="hidden" id="shareUserId" />
+          <p class="muted" id="shareSelected">No user selected</p>
           <label>Permission
             <select id="sharePerm">
               <option value="view">View</option>

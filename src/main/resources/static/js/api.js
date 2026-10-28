@@ -56,6 +56,7 @@ const api = {
   readNotification: (id) => request("/notifications/" + id + "/read", { method: "PUT" }),
   // user/profile
   me: () => request("/users/me"),
+  searchUsers: (q) => request("/users/search?username=" + encodeURIComponent(q)),
   updateMe: (b) => request("/users/me", { method: "PUT", body: JSON.stringify(b) }),
   getSettings: () => request("/users/me/settings"),
   updateSettings: (b) => request("/users/me/settings", { method: "PUT", body: JSON.stringify(b) }),
