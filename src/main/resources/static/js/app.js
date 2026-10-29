@@ -164,6 +164,7 @@ async function refreshNotes() {
           <button class="btn" onclick="editNote(${n.noteID})">Edit</button>
           <button class="btn" onclick="togglePin(${n.noteID}, ${!n.isPinned})">${n.isPinned ? "Unpin" : "Pin"}</button>
           <button class="btn" onclick="shareNotePrompt(${n.noteID})">Share</button>
+          <button class="btn" onclick="manageShares(${n.noteID})">Shares</button>
           <button class="btn danger" onclick="removeNote(${n.noteID})">Delete</button>
         </div>
       </div>
@@ -194,15 +195,67 @@ async function viewNote(id) {
 async function editNote(id) {
   try {
     const n = await api.getNote(id);
-    const newTitle = prompt("New title:", n.title);
-    if (newTitle === null) return;
-    const newContent = prompt("New content:", n.contents || "");
-    if (newContent === null) return;
-    await api.updateNote(id, { title: newTitle, contents: newContent, noteType: n.noteType, visibility: n.visibility });
-    toast("Updated", "ok");
-    await refreshNotes();
+    $("#editId").value = n.noteID;
+    $("#editTitle").value = n.title || "";
+    $("#editContent").value = n.contents || "";
+    $("#editType").value = n.noteType || "text";
+    $("#editVisibility").value = n.visibility || "private";
+    $("#editColor").value = n.color || "";
+    $("#editMsg").textContent = "";
+    $("#editModal").classList.remove("hidden");
   } catch (e) { toast(e.message, "error"); }
 }
+
+$("#editForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = $("#editMsg");
+  const id = $("#editId").value;
+  try {
+    await api.updateNote(id, {
+      title: $("#editTitle").value.trim(),
+      contents: $("#editContent").value.trim(),
+      noteType: $("#editType").value,
+      visibility: $("#editVisibility").value,
+      color: $("#editColor").value.trim() || null,
+    });
+    showMsg(msg, "Updated!", "ok");
+    toast("Updated", "ok");
+    $("#editModal").classList.add("hidden");
+    await refreshNotes();
+  } catch (err) { showMsg(msg, err.message, "error"); }
+});
+$("#editModalClose").addEventListener("click", () => $("#editModal").classList.add("hidden"));
+$("#editModal").addEventListener("click", (e) => { if (e.target.id === "editModal") $("#editModal").classList.add("hidden"); });
+
+$("#newNoteBtn").addEventListener("click", () => {
+  $("#createTitle").value = "";
+  $("#createContent").value = "";
+  $("#createType").value = "text";
+  $("#createVisibility").value = "private";
+  $("#createColor").value = "";
+  $("#createMsg").textContent = "";
+  $("#createModal").classList.remove("hidden");
+});
+$("#createForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = $("#createMsg");
+  try {
+    await api.createNote({
+      title: $("#createTitle").value.trim(),
+      contents: $("#createContent").value.trim(),
+      noteType: $("#createType").value,
+      visibility: $("#createVisibility").value,
+      color: $("#createColor").value.trim() || null,
+    });
+    showMsg(msg, "Created!", "ok");
+    toast("Created", "ok");
+    $("#createModal").classList.add("hidden");
+    await refreshNotes();
+    await refreshDashboard();
+  } catch (err) { showMsg(msg, err.message, "error"); }
+});
+$("#createModalClose").addEventListener("click", () => $("#createModal").classList.add("hidden"));
+$("#createModal").addEventListener("click", (e) => { if (e.target.id === "createModal") $("#createModal").classList.add("hidden"); });
 
 async function togglePin(id, pinned) {
   try {
@@ -258,6 +311,39 @@ $("#shareForm").addEventListener("submit", async (e) => {
 });
 $("#shareModalClose").addEventListener("click", () => $("#shareModal").classList.add("hidden"));
 $("#shareModal").addEventListener("click", (e) => { if (e.target.id === "shareModal") $("#shareModal").classList.add("hidden"); });
+
+async function manageShares(id) {
+  $("#sharesList").innerHTML = "<p class='muted'>Loading...</p>";
+  $("#sharesMsg").textContent = "";
+  $("#sharesModal").classList.remove("hidden");
+  try {
+    const shares = await api.listShares(id);
+    if (!shares || !shares.length) { $("#sharesList").innerHTML = "<p class='muted'>No shares yet.</p>"; return; }
+    $("#sharesList").innerHTML = shares.map(s => `
+      <div class="item">
+        <strong>${escapeHtml(s.username)}</strong> (id ${s.userId})
+        <div class="meta">Permission: ${s.permission} · Favorite: ${s.isFavorite ? "yes" : "no"}</div>
+        <div class="actions">
+          <button class="btn danger" onclick="unshareUser(${id}, ${s.userId})">Unshare</button>
+        </div>
+      </div>
+    `).join("");
+  } catch (e) {
+    $("#sharesList").innerHTML = "<p class='msg error'>" + escapeHtml(e.message) + "</p>";
+  }
+}
+
+async function unshareUser(noteId, userId) {
+  if (!confirm("Unshare this note?")) return;
+  try {
+    await api.unshareNote(noteId, userId);
+    toast("Unshared", "ok");
+    await manageShares(noteId);
+  } catch (e) { toast(e.message, "error"); }
+}
+
+$("#sharesModalClose").addEventListener("click", () => $("#sharesModal").classList.add("hidden"));
+$("#sharesModal").addEventListener("click", (e) => { if (e.target.id === "sharesModal") $("#sharesModal").classList.add("hidden"); });
 
 async function removeNote(id) {
   if (!confirm("Delete this note?")) return;

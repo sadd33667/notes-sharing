@@ -3,6 +3,7 @@ package com.notes.sharing.controller;
 import com.notes.sharing.dto.FavoriteRequest;
 import com.notes.sharing.dto.NoteResponse;
 import com.notes.sharing.dto.ShareRequest;
+import com.notes.sharing.dto.ShareResponse;
 import com.notes.sharing.service.SharingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,13 @@ public class SharingController {
             @CurrentUserId Long requesterId) {
         sharingService.unshare(id, requesterId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/api/notes/{id}/shares")
+    public ResponseEntity<List<ShareResponse>> listShares(
+            @PathVariable Long id,
+            @CurrentUserId Long requesterId) {
+        return ResponseEntity.ok(sharingService.listShares(id, requesterId));
     }
 
     @GetMapping("/api/notes/shared-with-me")

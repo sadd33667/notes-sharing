@@ -86,6 +86,7 @@
       <div class="row between">
         <h2>My Notes</h2>
         <div class="row">
+          <button id="newNoteBtn" class="btn primary">+ New note</button>
           <select id="noteTypeFilter">
             <option value="">All types</option>
             <option value="text">Text</option>
@@ -210,6 +211,84 @@
       <div class="modal-card">
         <button id="modalClose" class="modal-close">&times;</button>
         <div id="modalBody"></div>
+      </div>
+    </div>
+
+    <div id="createModal" class="modal hidden">
+      <div class="modal-card">
+        <button id="createModalClose" class="modal-close">&times;</button>
+        <h3>New note</h3>
+        <form id="createForm">
+          <label>Title
+            <input type="text" id="createTitle" required />
+          </label>
+          <label>Content
+            <textarea id="createContent" required></textarea>
+          </label>
+          <div class="row">
+            <label style="flex:1">Type
+              <select id="createType">
+                <option value="text">Text</option>
+                <option value="reminder">Reminder</option>
+              </select>
+            </label>
+            <label style="flex:1">Visibility
+              <select id="createVisibility">
+                <option value="private">Private</option>
+                <option value="public">Public</option>
+              </select>
+            </label>
+            <label style="flex:1">Color
+              <input type="text" id="createColor" placeholder="#hex" />
+            </label>
+          </div>
+          <button type="submit" class="btn primary">Create</button>
+        </form>
+        <div id="createMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <div id="editModal" class="modal hidden">
+      <div class="modal-card">
+        <button id="editModalClose" class="modal-close">&times;</button>
+        <h3>Edit note</h3>
+        <form id="editForm">
+          <input type="hidden" id="editId" />
+          <label>Title
+            <input type="text" id="editTitle" required />
+          </label>
+          <label>Content
+            <textarea id="editContent" required></textarea>
+          </label>
+          <div class="row">
+            <label style="flex:1">Type
+              <select id="editType">
+                <option value="text">Text</option>
+                <option value="reminder">Reminder</option>
+              </select>
+            </label>
+            <label style="flex:1">Visibility
+              <select id="editVisibility">
+                <option value="private">Private</option>
+                <option value="public">Public</option>
+              </select>
+            </label>
+            <label style="flex:1">Color
+              <input type="text" id="editColor" placeholder="#hex" />
+            </label>
+          </div>
+          <button type="submit" class="btn primary">Save</button>
+        </form>
+        <div id="editMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <div id="sharesModal" class="modal hidden">
+      <div class="modal-card">
+        <button id="sharesModalClose" class="modal-close">&times;</button>
+        <h3>Manage shares</h3>
+        <div id="sharesList" class="list"></div>
+        <div id="sharesMsg" class="msg"></div>
       </div>
     </div>
 

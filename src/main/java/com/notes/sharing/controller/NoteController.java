@@ -43,7 +43,8 @@ public class NoteController {
             @RequestBody UpdateNoteRequest body,
             @CurrentUserId Long userId) {
         Long requesterId = userId;
-        return ResponseEntity.ok(noteService.updateNote(id, requesterId, body.getTitle(), body.getContents()));
+        return ResponseEntity.ok(noteService.updateNote(id, requesterId, body.getTitle(), body.getContents(),
+                body.getNoteType(), body.getVisibility(), body.getColor()));
     }
 
     @DeleteMapping("/{id}")

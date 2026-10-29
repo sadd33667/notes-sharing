@@ -74,7 +74,8 @@ public class NoteService {
     }
 
     @Transactional
-    public NoteResponse updateNote(Long noteId, Long requesterId, String title, String contents) {
+    public NoteResponse updateNote(Long noteId, Long requesterId, String title, String contents,
+                                  String noteType, String visibility, String color) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new SystemException(ErrorCode.NOTE_NOT_FOUND, "Note not found: " + noteId));
 
@@ -88,6 +89,12 @@ public class NoteService {
         }
         if (title != null && !title.isBlank()) note.setTitle(title);
         if (contents != null) note.setContents(contents);
+        // Only the owner may change type/visibility/color.
+        if (isOwner) {
+            if (noteType != null && !noteType.isBlank()) note.setNoteType(noteType);
+            if (visibility != null && !visibility.isBlank()) note.setVisibility(visibility);
+            if (color != null) note.setColor(color.isBlank() ? null : color);
+        }
         Note saved = noteRepository.save(note);
         log.info("Note {} updated by user {}", noteId, requesterId);
         return noteMapper.toResponse(saved);

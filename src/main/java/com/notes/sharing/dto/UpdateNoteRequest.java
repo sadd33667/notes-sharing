@@ -6,4 +6,7 @@ import lombok.*;
 public class UpdateNoteRequest {
     private String title;
     private String contents;
+    private String noteType;
+    private String visibility;
+    private String color;
 }

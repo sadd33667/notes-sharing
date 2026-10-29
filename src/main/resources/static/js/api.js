@@ -41,6 +41,7 @@ const api = {
   pinNote: (id, pinned) => request("/notes/" + id + "/pin", { method: "PUT", body: JSON.stringify({ isPinned: pinned }) }),
   // sharing
   shareNote: (id, b) => request("/notes/" + id + "/share", { method: "POST", body: JSON.stringify(b) }),
+  listShares: (id) => request("/notes/" + id + "/shares"),
   unshareNote: (id, userId) => request("/notes/" + id + "/share/" + userId, { method: "DELETE" }),
   sharedWithMe: () => request("/notes/shared-with-me"),
   favorite: (id, favorite) => request("/notes/" + id + "/favorite", { method: "PUT", body: JSON.stringify({ isFavorite: favorite }) }),

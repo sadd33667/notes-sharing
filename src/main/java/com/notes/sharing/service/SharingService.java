@@ -1,6 +1,7 @@
 package com.notes.sharing.service;
 
 import com.notes.sharing.dto.NoteResponse;
+import com.notes.sharing.dto.ShareResponse;
 import com.notes.sharing.entity.Note;
 import com.notes.sharing.entity.NoteSharing;
 import com.notes.sharing.entity.Notification;
@@ -78,6 +79,26 @@ public class SharingService {
                 .findFirst()
                 .ifPresent(sharingRepository::delete);
         log.info("Note {} unshared by user {} with user {}", noteId, ownerId, targetUserId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ShareResponse> listShares(Long noteId, Long requesterId) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new SystemException(ErrorCode.NOTE_NOT_FOUND, "Note not found: " + noteId));
+        if (!note.getOwner().getUserID().equals(requesterId)) {
+            throw new SystemException(ErrorCode.NOTE_SHARE_DENIED, "Only the owner can view shares");
+        }
+        List<ShareResponse> out = new java.util.ArrayList<>();
+        for (NoteSharing s : sharingRepository.findByNote_NoteID(noteId)) {
+            out.add(ShareResponse.builder()
+                    .sharingID(s.getSharingID())
+                    .userId(s.getUser().getUserID())
+                    .username(s.getUser().getUsername())
+                    .permission(s.getPermission())
+                    .isFavorite(s.getIsFavorite())
+                    .build());
+        }
+        return out;
     }
 
     @Transactional(readOnly = true)
